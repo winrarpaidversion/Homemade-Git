@@ -19,6 +19,7 @@ namespace HomemadeGit.Desktop
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = (Application.Current as App).Services.GetService<Main>();
         }
     }
 }
