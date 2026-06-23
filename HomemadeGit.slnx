@@ -1,0 +1,13 @@
+<Solution>
+  <Project Path="src/HomemadeGit.Api/HomemadeGit.Api.csproj">
+    <BuildDependency Project="src/HomemadeGit.Core/HomemadeGit.Core.csproj" />
+    <BuildDependency Project="src/HomemadeGit.Infrastructure/HomemadeGit.Infrastructure.csproj" />
+  </Project>
+  <Project Path="src/HomemadeGit.Core/HomemadeGit.Core.csproj" />
+  <Project Path="src/HomemadeGit.Desktop/HomemadeGit.Desktop.csproj">
+    <BuildDependency Project="src/HomemadeGit.Core/HomemadeGit.Core.csproj" />
+  </Project>
+  <Project Path="src/HomemadeGit.Infrastructure/HomemadeGit.Infrastructure.csproj">
+    <BuildDependency Project="src/HomemadeGit.Core/HomemadeGit.Core.csproj" />
+  </Project>
+</Solution>
