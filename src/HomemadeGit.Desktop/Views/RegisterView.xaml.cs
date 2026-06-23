@@ -1,4 +1,4 @@
-﻿using HomemadeGit.Desktop.ViewsModel;
+﻿using HomemadeGit.Desktop.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -23,7 +23,7 @@ namespace HomemadeGit.Desktop.Views
         public RegisterView()
         {
             InitializeComponent();
-            DataContext = (Application.Current as App).Services.GetService<RegisterViewModel>();
+         
         }
     }
 }

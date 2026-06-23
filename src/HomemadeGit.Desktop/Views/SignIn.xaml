@@ -5,8 +5,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HomemadeGit.Desktop.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800"  Background="White"
+                xmlns:vm="clr-namespace:HomemadeGit.Desktop.ViewModel"
+   
+            d:DataContext="{d:DesignInstance Type=vm:RegisterViewModel}">
     <Grid>
-            
+        <StackPanel>
+            <TextBlock Text="Авторизация"></TextBlock>
+            <Button Command="{Binding GoToSignUpCommand}" Width="100"  Content="переключится на reg"></Button>
+        </StackPanel>
     </Grid>
 </UserControl>

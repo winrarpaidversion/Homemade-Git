@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
-using HomemadeGit.Desktop.ViewsModel;
+using HomemadeGit.Desktop.ViewModel;
 namespace HomemadeGit.Desktop
 {
     /// <summary>
@@ -19,9 +19,9 @@ namespace HomemadeGit.Desktop
         private static IServiceProvider ConfigureServices()
         {
             var services = new ServiceCollection();
-
-        
+            services.AddTransient<fakeauth>();
             services.AddTransient<MainViewModel>();
+            services.AddTransient<RegisterViewModel>();
             services.AddTransient<SelectingViewModel>();
 
             return services.BuildServiceProvider();
