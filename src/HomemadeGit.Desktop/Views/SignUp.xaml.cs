@@ -1,6 +1,4 @@
-﻿using HomemadeGit.Desktop.ViewModel;
-using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
@@ -23,7 +21,6 @@ namespace HomemadeGit.Desktop.Views
         public SignUp()
         {
             InitializeComponent();
-       
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using HomemadeGit.Desktop.ViewModel;
-using Microsoft.Extensions.DependencyInjection;
-using System.Text;
+﻿using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -21,7 +19,7 @@ namespace HomemadeGit.Desktop
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = (Application.Current as App).Services.GetService<MainViewModel>();
+            DataContext = (Application.Current as App).Services.GetService<Main>();
         }
     }
 }
