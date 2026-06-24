@@ -5,8 +5,19 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HomemadeGit.Desktop.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
+             d:DesignHeight="450" d:DesignWidth="800"  Background="Black"
+                xmlns:vm="clr-namespace:HomemadeGit.Desktop.ViewModel"
+   
+            d:DataContext="{d:DesignInstance Type=vm:RegisterViewModel}">
+    <Grid ColumnDefinitions="* ,*, *" RowDefinitions="*, auto,*">
+        <Border Grid.Column="1" Grid.Row="1" BorderBrush="White" Background="Gray"  BorderThickness="3" CornerRadius="10">
+            <StackPanel>
+            <TextBlock Text="HomemadeGit" HorizontalAlignment="Center"></TextBlock>
+                <TextBox Text="{Binding Login}"  Margin="10"></TextBox>
+                <TextBox Text="{Binding Password}" Margin="10" ></TextBox>
+                <Button Command="{Binding SignInCommand}"  Width="120" Height="30" Margin="10"  Content="войти"></Button>
+                <Button Command="{Binding GoToSignUpCommand}"  Width="120" Height="30" Margin="10" Content="Регистрация"></Button>
+        </StackPanel>
+        </Border>
     </Grid>
 </UserControl>

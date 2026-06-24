@@ -19,10 +19,10 @@ namespace HomemadeGit.Desktop
         private static IServiceProvider ConfigureServices()
         {
             var services = new ServiceCollection();
-
-        
-            services.AddTransient<MainViewModel>();
-            services.AddTransient<SelectingViewModel>();
+            services.AddSingleton<fakeauth>();
+            services.AddSingleton<MainViewModel>();
+            services.AddSingleton<RegisterViewModel>();
+            services.AddSingleton<GitViewModel>();
 
             return services.BuildServiceProvider();
         }

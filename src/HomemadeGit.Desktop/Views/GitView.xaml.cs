@@ -16,11 +16,12 @@ namespace HomemadeGit.Desktop.Views
     /// <summary>
     /// Логика взаимодействия для SelectingView.xaml
     /// </summary>
-    public partial class SelectingView : UserControl
+    public partial class GitView : UserControl
     {
-        public SelectingView()
+        public GitView()
         {
             InitializeComponent();
+            //DataContext = (Application.Current as App).Services.GetService<GitViewModel>();
         }
     }
 }
