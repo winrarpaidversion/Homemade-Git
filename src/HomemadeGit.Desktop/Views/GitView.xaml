@@ -8,6 +8,18 @@
              xmlns:views="clr-namespace:HomemadeGit.Desktop.Views"
             xmlns:vm="clr-namespace:HomemadeGit.Desktop.ViewModel"
                 d:DataContext="{d:DesignInstance Type=vm:GitViewModel}">
-    
-  
+
+    <Grid ColumnDefinitions="200,*" RowDefinitions="*, *" ShowGridLines="True">
+        <Border Grid.Column="0" Grid.RowSpan="2" Background="Gray" BorderBrush="AntiqueWhite" CornerRadius="20">
+            <Grid RowDefinitions="*,*" ShowGridLines="True">
+                <StackPanel  Orientation="Vertical" Grid.Row="1"  VerticalAlignment="Bottom">
+                    <TextBox ></TextBox>
+                    <TextBox Height="120"></TextBox>
+                    <Button Height="20"></Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+        <GridSplitter Grid.Column="0" Grid.RowSpan="2" Width="5" VerticalAlignment="Stretch" Background="#CCCCCC" Cursor="SizeWE"  />
+
+    </Grid>
 </UserControl>

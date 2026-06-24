@@ -15,9 +15,9 @@
         <DataTemplate DataType="{x:Type vm:RegisterViewModel}">
             <views:RegisterView />
         </DataTemplate>
-        <!--DataTemplate DataType="{x:Type vm:GitViewModel}">
+        <DataTemplate DataType="{x:Type vm:GitViewModel}">
             <views:GitView />
-        </DataTemplate>-->
+        </DataTemplate>
     </Window.Resources>
     <Grid>
         <ContentControl Content="{Binding CurrentPage}"  />
