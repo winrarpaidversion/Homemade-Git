@@ -1,4 +1,4 @@
-﻿using HomemadeGit.Desktop.ViewsModel;
+﻿using HomemadeGit.Desktop.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;

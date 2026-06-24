@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HomemadeGit.Desktop.ViewsModel
+namespace HomemadeGit.Desktop.ViewModel
 {
-    internal class SelectingViewModel
+   public class fakeauth
     {
     }
 }

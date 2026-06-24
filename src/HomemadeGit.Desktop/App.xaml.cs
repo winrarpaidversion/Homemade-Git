@@ -1,7 +1,8 @@
-﻿using System;
-using System.Windows;
+﻿using HomemadeGit.Desktop.ViewModel;
+
 using Microsoft.Extensions.DependencyInjection;
-using HomemadeGit.Desktop.ViewsModel;
+using System;
+using System.Windows;
 namespace HomemadeGit.Desktop
 {
     /// <summary>

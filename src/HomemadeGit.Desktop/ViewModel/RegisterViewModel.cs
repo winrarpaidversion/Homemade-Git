@@ -1,3 +1,4 @@
+﻿
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
@@ -8,11 +9,6 @@ namespace HomemadeGit.Desktop.ViewModel
 {
     public partial class RegisterViewModel : ViewModelBase
     {
-        [ObservableProperty]
-        private string _login;
-        [ObservableProperty]
-        private string _password;
-
         [ObservableProperty]
         private bool _isCheck = false;
         private fakeauth Fakeauth;
@@ -25,20 +21,12 @@ namespace HomemadeGit.Desktop.ViewModel
         [RelayCommand]
         public void SignUp()
         {
-            //var auth = new Fakeauth.void(_login, _password);
-            //if (auth != null)
-            //{
-            //    MainViewModel.CurrentPage = new GitViewModel();
-            //}
+            MainViewModel.CurrentPage =new  GitViewModel();
         }
         [RelayCommand]
         public void SignIn()
         {
-            //var auth = new Fakeauth.void(_login, _password);
-            //if (auth != null)
-            //{
-            //    MainViewModel.CurrentPage = new GitViewModel();
-            //}
+            MainViewModel.CurrentPage = new GitViewModel();
         }
 
 

@@ -12,8 +12,11 @@
         <Border Grid.Column="1" Grid.Row="1" BorderBrush="White" Background="Gray"  BorderThickness="3" CornerRadius="10">
             <StackPanel>
                 <TextBlock Text="Регистрация" HorizontalAlignment="Center"></TextBlock>
-                <TextBox Text="{Binding Login}"  Margin="10"></TextBox>
-                <TextBox Text="{Binding Password}" Margin="10" ></TextBox>
+                <TextBlock Text="введите новое имя" HorizontalAlignment="Left" Margin="10"></TextBlock>
+
+                <TextBox Text="{Binding Login}" Margin="10"></TextBox>
+                <TextBlock Text="введите новый пароль" HorizontalAlignment="Left" Margin="10"></TextBlock>
+                <TextBox Text="{Binding Password}" Margin="10"  ></TextBox>
                 <Button Command="{Binding SignUpCommand}"  Width="120" Height="30" Margin="10"  Content="войти"></Button>
                 <Button Command="{Binding GoToSignInCommand}" Width="120" Height="30"  Margin="10" Content="Авторизироваться"></Button>
             </StackPanel>
