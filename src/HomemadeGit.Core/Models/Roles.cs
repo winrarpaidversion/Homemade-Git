@@ -8,5 +8,7 @@ namespace HomemadeGit.Core.Models
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
+
+        public ICollection<UserRepository> UserRepositories { get; set; } = new List<UserRepository>();
     }
 }
