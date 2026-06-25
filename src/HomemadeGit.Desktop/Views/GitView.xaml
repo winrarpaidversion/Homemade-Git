@@ -6,20 +6,40 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" Background="Black"
              xmlns:views="clr-namespace:HomemadeGit.Desktop.Views"
-            xmlns:vm="clr-namespace:HomemadeGit.Desktop.ViewModel"
-                d:DataContext="{d:DesignInstance Type=vm:GitViewModel}">
+             xmlns:vm="clr-namespace:HomemadeGit.Desktop.ViewModel"
+             d:DataContext="{d:DesignInstance Type=vm:GitViewModel}">
 
-    <Grid ColumnDefinitions="200,*" RowDefinitions="*, *" ShowGridLines="True">
-        <Border Grid.Column="0" Grid.RowSpan="2" Background="Gray" BorderBrush="AntiqueWhite" CornerRadius="20">
-            <Grid RowDefinitions="*,*" ShowGridLines="True">
+    <Grid RowDefinitions="30, *" >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="50" MaxWidth="250"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Border Grid.Column="0" Grid.RowSpan="2" Background="#25292E" BorderBrush="AntiqueWhite" CornerRadius="20">
+            
+            <Grid RowDefinitions="*,*" >
+                <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
+                    <Menu>
+                        <MenuItem Header="File" >
+                            <MenuItem Header="New Repository" Command="{Binding NewRepositoryCommand}"/>
+                        </MenuItem>
+                       
+                     
+                    </Menu>
+                    <ComboBox></ComboBox>
+                    <Button  Content="Changes"  HorizontalAlignment="Stretch"></Button>
+                    <Button  Content="History" Width="auto" HorizontalAlignment="Stretch" ></Button>
+
+                </StackPanel>
                 <StackPanel  Orientation="Vertical" Grid.Row="1"  VerticalAlignment="Bottom">
-                    <TextBox ></TextBox>
-                    <TextBox Height="120"></TextBox>
-                    <Button Height="20"></Button>
+                    <TextBox Text="{Binding Title}" Background="#1E2125" Foreground="White"></TextBox>
+                    <TextBox Text="{Binding Description}" Height="120" Background="#1E2125" Foreground="White"></TextBox>
+                    <Button Command="{Binding PushCommitCommand}"  Height="20" Background="#285496"></Button>
                 </StackPanel>
             </Grid>
         </Border>
-        <GridSplitter Grid.Column="0" Grid.RowSpan="2" Width="5" VerticalAlignment="Stretch" Background="#CCCCCC" Cursor="SizeWE"  />
-
+        <GridSplitter Grid.Column="0" Grid.RowSpan="2" Width="5" VerticalAlignment="Stretch" Background="#1C1E21" Cursor="SizeWE"  />
+        <Grid Grid.Column="2" Grid.Row="1"> 
+            <ListBox Background="#25292E"></ListBox>
+        </Grid>
     </Grid>
 </UserControl>
