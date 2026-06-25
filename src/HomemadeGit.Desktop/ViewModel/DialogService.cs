@@ -14,14 +14,28 @@ namespace HomemadeGit.Desktop.ViewModel
     {
         public string SelectFolder()
         {
-            var dialog = new OpenFolderDialog
-            {
-                Title = "Выберите папку для инициализации репозитория"
-            };
+            var dialog = new OpenFolderDialog();
+          
 
             if (dialog.ShowDialog() == true)
             {
+                dialog.ShowHiddenItems = true;
                 return dialog.FolderName;
+
+            }
+            return null;
+
+        }
+        public string SelectFile()
+        {
+            var dialog = new OpenFileDialog();
+
+
+            if (dialog.ShowDialog() == true)
+            {
+                dialog.ShowHiddenItems = true;
+                return dialog.FileName;
+
             }
             return null;
         }
