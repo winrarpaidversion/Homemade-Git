@@ -7,7 +7,7 @@ using System.Text;
 
 namespace HomemadeGit.Infrastructure.Data
 {
-    class AppDbContext : DbContext
+    public class AppDbContext : DbContext
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Roles> Roles { get; set; }
