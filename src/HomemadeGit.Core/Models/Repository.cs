@@ -15,7 +15,7 @@ namespace HomemadeGit.Core.Models
         public int? DefaultBranchId { get; set; }
 
         public string Name { get; set; } = string.Empty;
-        public string? Description { get; set; } = string.Empty;
+        public string? Description { get; set; } 
         public DateTime CreatedAt { get; set; }
 
         public ICollection<UserRepository> UserRepositories { get; set; } = new List<UserRepository>();
