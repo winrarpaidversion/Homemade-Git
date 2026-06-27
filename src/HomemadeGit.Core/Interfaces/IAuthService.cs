@@ -8,7 +8,7 @@ namespace HomemadeGit.Core.Interfaces
     public interface IAuthService
     {
         // Register, Login, 
-        Task RegisterAsync(RegisterRequest registerRequest);
+        Task<RegisterResponse> RegisterAsync(RegisterRequest registerRequest);
         Task<LoginResponse> LoginAsync(LoginRequest loginRequest);
     }
 }
