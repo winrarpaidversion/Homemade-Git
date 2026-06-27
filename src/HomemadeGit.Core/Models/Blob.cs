@@ -9,6 +9,7 @@ namespace HomemadeGit.Core.Models
         public int Id { get; set; }
         public string Hash { get; set; }
         public byte[] Data { get; set; }
+        public long Size { get; set; }
 
         public ICollection<CommitFiles> CommitFiles { get; set; } = new List<CommitFiles>();
     }
