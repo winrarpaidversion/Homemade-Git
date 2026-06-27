@@ -24,7 +24,7 @@ namespace HomemadeGit.Desktop.Services
                 Debug.WriteLine(error);
             }
             return await response.Content.ReadFromJsonAsync<RegisterResponse>();
-                   //?? throw new InvalidOperationException("Не удалось десериализовать RegisterResponse.");
+             
         }
 
         public async Task<LoginResponse> Login(string login, string password)
@@ -37,7 +37,7 @@ namespace HomemadeGit.Desktop.Services
                 Debug.WriteLine(error);
             }
             return await response.Content.ReadFromJsonAsync<LoginResponse>();
-                   //?? throw new InvalidOperationException("Не удалось десериализовать LoginResponse.");
+             
         }
     }
 }
