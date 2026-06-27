@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -9,14 +11,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace HomemadeGit.Desktop
+namespace HomemadeGit.Desktop.Views
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Логика взаимодействия для SignUp.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class SignUp : UserControl
     {
-        public MainWindow()
+        public SignUp()
         {
             InitializeComponent();
         }
