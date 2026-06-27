@@ -18,6 +18,8 @@ namespace HomemadeGit.Infrastructure.Data
         public DbSet<Commit> Commits { get; set; }
         public DbSet<CommitFiles> CommitFiles { get; set; }
 
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Branch>(entity =>

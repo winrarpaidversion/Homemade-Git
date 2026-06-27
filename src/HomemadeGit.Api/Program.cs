@@ -1,8 +1,10 @@
 
-using Microsoft.AspNetCore.Authentication;
 using HomemadeGit.Core.Interfaces;
 using HomemadeGit.Core.Services;
+using HomemadeGit.Infrastructure.Data;
 using HomemadeGit.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
 
 namespace HomemadeGit.Api
 {
@@ -22,9 +24,18 @@ namespace HomemadeGit.Api
             builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+            builder.Services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseSqlite(builder.Configuration.GetConnectionString("SQLiteConnection"));
+            });
 
             var app = builder.Build();
-
+            
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                dbContext.Database.Migrate();
+            }
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
