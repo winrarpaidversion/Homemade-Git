@@ -1,6 +1,8 @@
 ﻿
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HomemadeGit.Core.Services;
+using HomemadeGit.Desktop.Services;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,23 +12,37 @@ namespace HomemadeGit.Desktop.ViewModel
     public partial class RegisterViewModel : ViewModelBase
     {
         [ObservableProperty]
+        private string _login;
+        [ObservableProperty]
+        private string _password;
+        [ObservableProperty]
         private bool _isCheck = false;
-        private fakeauth Fakeauth;
+        private AuthClientService AuthClientService;
         private MainViewModel MainViewModel;
-        public RegisterViewModel(fakeauth fakeauth, MainViewModel mainViewModel)
+        public RegisterViewModel(AuthClientService authClientService, MainViewModel mainViewModel)
         {
-            Fakeauth = fakeauth;
+            AuthClientService = authClientService;
             MainViewModel = mainViewModel;
         }
         [RelayCommand]
         public void SignUp()
         {
-            MainViewModel.CurrentPage =new  GitViewModel();
+            var regiserResult = AuthClientService.Register(Login, Password);
+            if(regiserResult != null)
+            {
+                MainViewModel.CurrentPage = new GitViewModel();
+            }
+          
         }
         [RelayCommand]
         public void SignIn()
         {
-            MainViewModel.CurrentPage = new GitViewModel();
+            var loginResult = AuthClientService.Login(Login, Password);
+            if (loginResult != null)
+            {
+                MainViewModel.CurrentPage = new GitViewModel();
+            }
+
         }
 
 

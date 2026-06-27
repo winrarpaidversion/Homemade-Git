@@ -1,4 +1,5 @@
-﻿using HomemadeGit.Desktop.ViewModel;
+﻿using HomemadeGit.Desktop.Services;
+using HomemadeGit.Desktop.ViewModel;
 
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -20,8 +21,9 @@ namespace HomemadeGit.Desktop
         private static IServiceProvider ConfigureServices()
         {
             var services = new ServiceCollection();
-          
-            services.AddSingleton<fakeauth>();
+            services.AddHttpClient();
+    
+            services.AddSingleton<AuthClientService>();
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<RegisterViewModel>();
             services.AddSingleton<GitViewModel>();

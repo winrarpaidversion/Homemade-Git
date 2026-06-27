@@ -7,11 +7,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
+		<PackageReference Include="MvvmLightLibs" Version="5.4.1.1" />
+	</ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.4" />
-    <PackageReference Include="MvvmLightLibs" Version="5.4.1.1" />
+    <ProjectReference Include="..\HomemadeGit.Api\HomemadeGit.Api.csproj" />
+    <ProjectReference Include="..\HomemadeGit.Core\HomemadeGit.Core.csproj" />
   </ItemGroup>
 
 </Project>
