@@ -1,126 +1,342 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Win32;
+using GalaSoft.MvvmLight.Views;
+using HomemadeGit.Core.DTOs.Repositories;
+using HomemadeGit.Desktop.Services;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Windows.Shapes;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace HomemadeGit.Desktop.ViewModel
 {
-
     public partial class GitViewModel : ViewModelBase
     {
-        private string _repositoryRoot;
-        [ObservableProperty]
-        private string _title;
-        [ObservableProperty]
-        private string _description;
-        [ObservableProperty]
-        private string _path;
-        [ObservableProperty]
-        private FileSystemItem _selectedItem;
-        private DialogService DialogService;
+        private int UserId;
+        private string _repositoryRoot = string.Empty;
+        private IDialogService _dialogService;
+        private readonly RepositoryClientService _repositoryClientService;
+
+        // DTO для отображения в списке
+        public record RepositoryListItem(int Id, string Name, string? Description, bool IsPublic);
         public record FileSystemItem(string Name, string FullPath, bool IsDirectory);
+        public record TextLine(string Number, string Text);
+
+        // ===== СВОЙСТВА ДЛЯ ПРИВЯЗКИ В XAML =====
+
         [ObservableProperty]
-        private ObservableCollection<FileSystemItem> pathtofile = new();
-
-        public record textLine(string Number, string Text);
+        private string _searchQuery = string.Empty;
 
         [ObservableProperty]
-        public ObservableCollection<textLine> _codeLine = new ObservableCollection<textLine>();
+        private string _title = string.Empty;
 
-        public int UserId;
+        [ObservableProperty]
+        private string _description = string.Empty;
 
-        public GitViewModel(int userId)
+        [ObservableProperty]
+        private string _path = string.Empty;
+
+        [ObservableProperty]
+        private FileSystemItem? _selectedItem;
+
+        [ObservableProperty]
+        private RepositoryListItem? _selectedRepository;
+
+        [ObservableProperty]
+        private RepositoryResponse? _currentRepository;
+
+        [ObservableProperty]
+        private bool _isPublic = true;  // ВАЖНО: для привязки к CheckBox
+
+        [ObservableProperty]
+        private string _statusMessage = "Готов";  // ВАЖНО: для строки статуса
+
+        [ObservableProperty]
+        private ObservableCollection<RepositoryListItem> _repositories = new();  // ВАЖНО: называется Repositories
+
+        [ObservableProperty]
+        private ObservableCollection<FileSystemItem> _pathToFile = new();  // ВАЖНО: называется PathToFile
+
+        [ObservableProperty]
+        private ObservableCollection<TextLine> _codeLines = new();  // ВАЖНО: называется CodeLines
+
+        public GitViewModel(int userId, IDialogService dialogService, RepositoryClientService repositoryService)
         {
             UserId = userId;
-            DialogService = new DialogService();
-        }
-        [RelayCommand]
-        private void PushCommit()
-        {
-            if (string.IsNullOrWhiteSpace(Title) || string.IsNullOrWhiteSpace(Description)) return;
+            _dialogService = dialogService;
+            _repositoryClientService = repositoryService;
 
+            // Загружаем репозитории при старте
+            Task.Run(LoadRepositoriesAsync);
         }
-        [RelayCommand]
-        private void NewRepository()
-        {
-            Pathtofile.Clear();
-            Path = DialogService.SelectFolder();
-            if (Path == null) return;
 
-            LoadFolderContent(Path);
+        // ===== КОМАНДЫ =====
+
+        [RelayCommand]
+        private async Task LoadRepositoriesAsync()
+        {
+            try
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    StatusMessage = "Загрузка репозиториев...";
+                });
+
+                var result = await _repositoryClientService.GetRepositoriesAsync(UserId, SearchQuery);
+
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    Repositories.Clear();
+                    if (result != null)
+                    {
+                        foreach (var item in result)
+                        {
+                            Repositories.Add(new RepositoryListItem(
+                                item.Id,
+                                item.Name,
+                                item.Description ?? string.Empty,
+                                item.isPublic
+                            ));
+                        }
+                        StatusMessage = $"Загружено {Repositories.Count} репозиториев";
+                    }
+                    else
+                    {
+                        StatusMessage = "Не удалось загрузить репозитории";
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    StatusMessage = $"Ошибка: {ex.Message}";
+                });
+                Debug.WriteLine($"LoadRepositories Error: {ex.Message}");
+            }
         }
+
+        [RelayCommand]
+        private async Task SearchRepositoriesAsync()  // ВАЖНО: называется SearchRepositories
+        {
+            await LoadRepositoriesAsync();
+        }
+
+        [RelayCommand]
+        private async Task LoadRepositoryDetailsAsync()  // ВАЖНО: называется LoadRepositoryDetails
+        {
+            if (SelectedRepository == null)
+            {
+                StatusMessage = "Выберите репозиторий";
+                return;
+            }
+
+            try
+            {
+                StatusMessage = $"Загрузка {SelectedRepository.Name}...";
+
+                var repo = await _repositoryClientService.GetRepositoryAsync(SelectedRepository.Id, UserId);
+
+                if (repo != null)
+                {
+                    CurrentRepository = repo;
+                    Title = repo.Name;
+                    Description = repo.Description ?? string.Empty;
+                    IsPublic = repo.isPublic;
+                    StatusMessage = $"Загружен: {repo.Name}";
+                }
+                else
+                {
+                    StatusMessage = "Не удалось загрузить детали репозитория";
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Ошибка: {ex.Message}";
+                Debug.WriteLine($"LoadRepositoryDetails Error: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        private async Task CreateRepositoryAsync()  // ВАЖНО: называется CreateRepository
+        {
+            if (string.IsNullOrWhiteSpace(Title))
+            {
+                StatusMessage = "Введите название репозитория";
+                return;
+            }
+
+            try
+            {
+                StatusMessage = "Создание репозитория...";
+
+                var result = await _repositoryClientService.CreateRepositoryAsync(
+                    UserId,
+                    Title.Trim(),
+                    string.IsNullOrWhiteSpace(Description) ? null : Description.Trim(),
+                    IsPublic
+                );
+
+                if (result != null)
+                {
+                    StatusMessage = $"Репозиторий '{result.Name}' создан!";
+                    Title = string.Empty;
+                    Description = string.Empty;
+
+                    await LoadRepositoriesAsync();
+                }
+                else
+                {
+                    StatusMessage = "Не удалось создать репозиторий";
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Ошибка: {ex.Message}";
+                Debug.WriteLine($"CreateRepository Error: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        private async Task DeleteRepositoryAsync()
+        {
+            if (SelectedRepository == null)
+            {
+                StatusMessage = "Выберите репозиторий для удаления";
+                return;
+            }
+
+            try
+            {
+                StatusMessage = $"Удаление {SelectedRepository.Name}...";
+
+                var success = await _repositoryClientService.DeleteRepositoryAsync(SelectedRepository.Id, UserId);
+
+                if (success)
+                {
+                    StatusMessage = $"Репозиторий '{SelectedRepository.Name}' удален";
+                    CurrentRepository = null;
+                    Title = string.Empty;
+                    Description = string.Empty;
+
+                    await LoadRepositoriesAsync();
+                }
+                else
+                {
+                    StatusMessage = "Не удалось удалить репозиторий";
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Ошибка: {ex.Message}";
+                Debug.WriteLine($"DeleteRepository Error: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        private void BrowseFolder()  // ВАЖНО: называется BrowseFolder
+        {
+            string? selectedPath = _dialogService.SelectFolder();
+            if (!string.IsNullOrEmpty(selectedPath))
+            {
+                _repositoryRoot = selectedPath;
+                Path = selectedPath;
+                LoadFolderContent(selectedPath);
+                StatusMessage = $"Выбрана папка: {selectedPath}";
+            }
+        }
+
         private void LoadFolderContent(string targetPath)
         {
             try
             {
-             
-                pathtofile.Clear();
+                PathToFile.Clear();
 
-                if (targetPath != _repositoryRoot)
+                if (!string.IsNullOrEmpty(_repositoryRoot) && targetPath != _repositoryRoot)
                 {
-                    string parentDir = Directory.GetParent(targetPath)?.FullName;
+                    string? parentDir = Directory.GetParent(targetPath)?.FullName;
                     if (parentDir != null)
                     {
-                        pathtofile.Add(new FileSystemItem("...", parentDir, true));
+                        PathToFile.Add(new FileSystemItem("...", parentDir, true));
                     }
                 }
 
-     
-                string[] subdirect = Directory.GetDirectories(targetPath);
-                foreach (string sub in subdirect)
+                foreach (string sub in Directory.GetDirectories(targetPath))
                 {
-                    pathtofile.Add(new FileSystemItem(System.IO.Path.GetFileName(sub), sub, true));
+                    PathToFile.Add(new FileSystemItem(System.IO.Path.GetFileName(sub), sub, true));
                 }
 
-           
-                string[] subfile = Directory.GetFiles(targetPath);
-                foreach (string file in subfile)
+                foreach (string file in Directory.GetFiles(targetPath))
                 {
-            
-                    pathtofile.Add(new FileSystemItem(System.IO.Path.GetFileName(file), file, false));
+                    PathToFile.Add(new FileSystemItem(System.IO.Path.GetFileName(file), file, false));
                 }
 
-          
                 Path = targetPath;
+                StatusMessage = $"Загружено {PathToFile.Count} элементов";
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Ошибка доступа к папке: {ex.Message}");
+                StatusMessage = $"Ошибка доступа: {ex.Message}";
+                Debug.WriteLine($"LoadFolderContent Error: {ex.Message}");
             }
-
         }
+
         [RelayCommand]
-        private void LoadAndIndexText(string filePath)
+        private void LoadTextFile(string filePath)
         {
-            string[] line = File.ReadAllLines(filePath);
-            CodeLine.Clear();
-            for (int i = 0; i < line.Length; i++)
+            try
             {
-                string num = (i + 1).ToString();
-                string text = line[i];
-                CodeLine.Add(new textLine(num, text));
+                if (!File.Exists(filePath))
+                {
+                    StatusMessage = "Файл не найден";
+                    return;
+                }
+
+                string[] lines = File.ReadAllLines(filePath);
+                CodeLines.Clear();
+
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    CodeLines.Add(new TextLine((i + 1).ToString(), lines[i]));
+                }
+
+                StatusMessage = $"Загружено {lines.Length} строк из {System.IO.Path.GetFileName(filePath)}";
             }
-
-
+            catch (Exception ex)
+            {
+                StatusMessage = $"Ошибка чтения файла: {ex.Message}";
+                Debug.WriteLine($"LoadTextFile Error: {ex.Message}");
+            }
         }
-        partial void OnSelectedItemChanged(FileSystemItem value)
+
+        partial void OnSelectedItemChanged(FileSystemItem? value)
         {
             if (value == null) return;
 
-            if (!value.IsDirectory && File.Exists(value.FullPath))
+            if (value.IsDirectory)
             {
-                LoadAndIndexText(value.FullPath);
+                LoadFolderContent(value.FullPath);
             }
-            else if (value.IsDirectory) { LoadFolderContent(value.FullPath); }
+            else if (File.Exists(value.FullPath))
+            {
+                string[] textExtensions = { ".txt", ".cs", ".xaml", ".xml", ".json", ".js", ".html", ".css", ".md", ".sql", ".yml", ".yaml" };
+                string ext =System.IO.Path.GetExtension(value.FullPath).ToLower();
+
+                if (textExtensions.Contains(ext))
+                {
+                    LoadTextFile(value.FullPath);
+                }
+                else
+                {
+                    StatusMessage = $"Файл {System.IO.Path.GetFileName(value.FullPath)} не является текстовым";
+                }
+            }
         }
+
+        // Свойство для XAML
+        public int SelectedRepositoryId => SelectedRepository?.Id ?? 0;
     }
-
 }
-
-

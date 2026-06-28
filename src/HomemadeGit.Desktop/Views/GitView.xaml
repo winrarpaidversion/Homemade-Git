@@ -4,102 +4,184 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" Background="Black"
-             xmlns:views="clr-namespace:HomemadeGit.Desktop.Views"
+             d:DesignHeight="450" d:DesignWidth="800"
              xmlns:vm="clr-namespace:HomemadeGit.Desktop.ViewModel"
              d:DataContext="{d:DesignInstance Type=vm:GitViewModel}">
 
-    <Grid RowDefinitions="30, *" >
+    <Grid Background="#1E2125">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition MinWidth="50" MaxWidth="250"></ColumnDefinition>
-            <ColumnDefinition MinWidth="50" MaxWidth="320"></ColumnDefinition>
-            <ColumnDefinition Width="auto"></ColumnDefinition>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-         <!--ПЕРВАЯ БОКОВАЯ ПАНЕЛЬ ДЛЯ КОММИТОВ И ПРОСМОТР РЕПОЗИТОРИЙ -->
-        <Border Grid.Column="0" Grid.RowSpan="2" Background="#25292E" BorderBrush="AntiqueWhite" CornerRadius="20">
 
-            <Grid RowDefinitions="*,*" >
-                <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
-                    <Menu>
-                        <MenuItem Header="File" >
-                            <MenuItem Header="New Repository" Command="{Binding NewRepositoryCommand}"/>
-                        </MenuItem>
-                    </Menu>
-                    <ComboBox></ComboBox>
-                    <Button  Content="Changes"  HorizontalAlignment="Stretch"></Button>
-                    <Button  Content="History" Width="auto" HorizontalAlignment="Stretch" ></Button>
-                    <ListBox ItemsSource="{Binding Pathtofile}" Height="145" Background="#1E2125">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+        <!-- Строка статуса -->
+        <Border Grid.Row="0" Grid.ColumnSpan="5" Background="#2C3136" Padding="5,0">
+            <TextBlock Text="{Binding StatusMessage}" Foreground="#8A8F98" FontSize="12" VerticalAlignment="Center"/>
+        </Border>
+
+        <!-- ЛЕВАЯ ПАНЕЛЬ: Список репозиториев и создание -->
+        <Border Grid.Row="1" Grid.Column="0" Background="#25292E">
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Поиск -->
+                <TextBox Grid.Row="0" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" 
+                         Background="#1E2125" Foreground="White" BorderBrush="#3A3F44" 
+                         Margin="0,0,0,5" Padding="5">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding SearchRepositoriesCommand}"/>
+                    </TextBox.InputBindings>
+                </TextBox>
+
+                <Button Grid.Row="1" Command="{Binding SearchRepositoriesCommand}" 
+                        Content="🔍 Поиск" Background="#285496" Foreground="White" 
+                        Margin="0,0,0,10" Height="30" BorderThickness="0"/>
+
+                <!-- Список репозиториев -->
+                <ListBox Grid.Row="2" ItemsSource="{Binding Repositories}" 
+                         SelectedItem="{Binding SelectedRepository}"
+                         Background="#1E2125" Foreground="White" BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="Transparent" Padding="5" Margin="0,2">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14" Foreground="White"/>
+                                    <TextBlock Text="{Binding Description}" FontSize="12" Foreground="#8A8F98"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!-- Кнопки управления репозиторием -->
+                <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,5">
+                    <Button Command="{Binding LoadRepositoryDetailsCommand}" 
+                            Content="📂 Открыть" Background="#285496" Foreground="White" 
+                            Height="25" Width="70" Margin="0,0,5,0" BorderThickness="0"/>
+                    <Button Command="{Binding DeleteRepositoryCommand}" 
+                            Content="🗑 Удалить" Background="#963528" Foreground="White" 
+                            Height="25" Width="70" BorderThickness="0"/>
                 </StackPanel>
-                <StackPanel  Orientation="Vertical" Grid.Row="1"  VerticalAlignment="Bottom">
-                    <TextBox Text="{Binding Title}" Background="#1E2125" Foreground="White"></TextBox>
-                    <TextBox Text="{Binding Description}" Height="120" Background="#1E2125" Foreground="White"></TextBox>
-                    <Button Command="{Binding PushCommitCommand}"  Height="20" Background="#285496"></Button>
-                </StackPanel>
+
+                <Separator Grid.Row="4" Background="#3A3F44" Margin="0,10"/>
+
+                <!-- Создание репозитория -->
+                <TextBlock Grid.Row="5" Text="✨ Создать репозиторий" Foreground="White" FontWeight="Bold" Margin="0,0,0,5"/>
+
+                <CheckBox Grid.Row="6" Content="Публичный" Foreground="Gray" 
+                          IsChecked="{Binding IsPublic}" Margin="0,0,0,5"/>
+
+                <TextBox Grid.Row="7" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" 
+                         Background="#1E2125" Foreground="White" Margin="0,0,0,5" 
+                         TextWrapping="Wrap" Height="30" BorderBrush="#3A3F44"/>
+
+                <TextBox Grid.Row="8" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
+                         Background="#1E2125" Foreground="White" TextWrapping="Wrap" 
+                         Height="60" Margin="0,0,0,5" BorderBrush="#3A3F44"/>
+
+                <Button Grid.Row="9" Command="{Binding CreateRepositoryCommand}" 
+                        Content="➕ Создать" Height="30" Background="#285496" Foreground="White" BorderThickness="0"/>
             </Grid>
         </Border>
-        <!--ВТОРАЯ ПАНЕЛЬ ДЛЯ СПИСОК ИЗ ПАПКИ И ПРОСМОТР РЕПОЗИТОРИЙ -->
-        <Border Grid.Column="1" Grid.Row="1">
-            <ListBox Background="Gray" 
-             ItemsSource="{Binding Pathtofile}" 
-             SelectedItem="{Binding SelectedItem}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal" Margin="2">
-                            <TextBlock VerticalAlignment="Center" Margin="0,0,5,0">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Text" Value="📄" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsDirectory}" Value="True">
-                                                <Setter Property="Text" Value="📁" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
 
-                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Foreground="White"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+        <GridSplitter Grid.Row="1" Grid.Column="1" Width="5" Background="#1C1E21" Cursor="SizeWE"/>
+
+        <!-- СРЕДНЯЯ ПАНЕЛЬ: Содержимое репозитория -->
+        <Border Grid.Row="1" Grid.Column="2" Background="#25292E">
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,5">
+                    <TextBlock Text="📁 Файлы" Foreground="White" FontWeight="Bold"/>
+                    <Button Command="{Binding BrowseFolderCommand}" 
+                            Content="📂 Выбрать папку" Background="#285496" Foreground="White" 
+                            Height="20" Margin="10,0,0,0" BorderThickness="0" FontSize="10"/>
+                </StackPanel>
+
+                <ListBox Grid.Row="1" Background="#1E2125" BorderThickness="0"
+                         ItemsSource="{Binding PathToFile}" 
+                         SelectedItem="{Binding SelectedItem}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="2">
+                                <TextBlock VerticalAlignment="Center" Margin="0,0,5,0" Foreground="White">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="📄"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDirectory}" Value="True">
+                                                    <Setter Property="Text" Value="📁"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Foreground="White" FontSize="13"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
         </Border>
 
-        <GridSplitter Grid.Column="1" Grid.RowSpan="2" Width="5" VerticalAlignment="Stretch" Background="#1C1E21" Cursor="SizeWE"  />
-        <!--ТРЕТЬЯ ПАНЕЛЬ ДЛЯ ПРОСМОТР КОДА ИЗ ПАПКИ-->
-        <Grid Grid.Column="2" Grid.Row="1">
-            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" >
-            <ItemsControl  ItemsSource="{Binding CodeLine}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Margin="0,2">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="40"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Text="{Binding  Number}" FontFamily="Consolas"
-                             Foreground="White" 
-                             Background="Transparent" 
-                             BorderThickness="0" 
-                             IsReadOnly="True" 
-                             TextWrapping="Wrap"/>
-                            <TextBox Grid.Column="1" Text="{Binding  Text, Mode=OneWay}" FontFamily="Consolas"
-                              Foreground="White" 
-                              Background="Transparent" 
-                              BorderThickness="0" 
-                              IsReadOnly="True" 
-                              TextWrapping="Wrap"/>
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            </ScrollViewer>
-        </Grid>
+        <GridSplitter Grid.Row="1" Grid.Column="3" Width="5" Background="#1C1E21" Cursor="SizeWE"/>
+
+        <!-- ПРАВАЯ ПАНЕЛЬ: Просмотр кода -->
+        <Border Grid.Row="1" Grid.Column="4" Background="#1E2125">
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="📝 Код" Foreground="White" FontWeight="Bold" Margin="0,0,0,5"/>
+
+                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" 
+                              Background="#1A1C20">
+                    <ItemsControl ItemsSource="{Binding CodeLines}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Background="#2A2D33">
+                                        <TextBlock Text="{Binding Number}" FontFamily="Consolas"
+                                                   Foreground="#6A6F78" 
+                                                   HorizontalAlignment="Center" FontSize="13"/>
+                                    </Border>
+                                    <TextBox Grid.Column="1" Text="{Binding Text, Mode=OneWay}" 
+                                             FontFamily="Consolas" Foreground="#D4D4D4" 
+                                             Background="Transparent" BorderThickness="0" 
+                                             IsReadOnly="True" TextWrapping="NoWrap" FontSize="13"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

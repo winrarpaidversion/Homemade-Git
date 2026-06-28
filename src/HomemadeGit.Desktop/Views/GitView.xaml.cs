@@ -23,7 +23,10 @@ namespace HomemadeGit.Desktop.Views
         public GitView()
         {
             InitializeComponent();
+            
          
         }
+
+       
     }
 }
