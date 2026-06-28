@@ -13,9 +13,5 @@ namespace HomemadeGit.Desktop.ViewModel
         private object? _currentPage;
         private AuthClientService AuthClientService;
 
-        public MainViewModel()
-        {
-           
-        }
     }
 }

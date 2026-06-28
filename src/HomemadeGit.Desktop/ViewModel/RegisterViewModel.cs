@@ -34,20 +34,20 @@ namespace HomemadeGit.Desktop.ViewModel
             _gitviewModelFactory = gitviewModelFactory;
         }
         [RelayCommand]
-        public void SignUp()
+        public async Task SignUp()
         {
 
-            var regiserResult = AuthClientService.Register(Login, Password);
+            var regiserResult =await AuthClientService.Register(Login, Password);
             if (string.IsNullOrWhiteSpace(Login) || string.IsNullOrWhiteSpace(Password))
             {
                 TitleError = "Введите все поля";
                 IsError = "Visible";
                 return;
             }
-            if (regiserResult.Id != 0)
+            if (regiserResult.UserId != 0 || regiserResult != null)
             {
 
-                MainViewModel.CurrentPage = _gitviewModelFactory(regiserResult.Id);
+                MainViewModel.CurrentPage = _gitviewModelFactory(regiserResult.UserId);
 
             }
             else
@@ -60,7 +60,7 @@ namespace HomemadeGit.Desktop.ViewModel
 
         }
         [RelayCommand]
-        public void SignIn()
+        public async Task SignIn()
         {
             if (string.IsNullOrWhiteSpace(Login) || string.IsNullOrWhiteSpace(Password))
             {
@@ -68,15 +68,15 @@ namespace HomemadeGit.Desktop.ViewModel
                 IsError = "Visible";
                 return;
             }
-            var loginResult = AuthClientService.Login(Login, Password);
-            if (loginResult.Id != 0)
+            var loginResult =await AuthClientService.Login(Login, Password);
+            if (loginResult.UserId != 0 || loginResult != null)
             {
-                MainViewModel.CurrentPage = _gitviewModelFactory(loginResult.Id);
+                MainViewModel.CurrentPage = _gitviewModelFactory(loginResult.UserId);
 
             }
             else
             {
-                TitleError = $"Такого пользователя нет: {loginResult.Exception}";
+                TitleError = $"Такого пользователя  {loginResult.Login} нет:";
                 IsError = "Visible";
 
                 return;

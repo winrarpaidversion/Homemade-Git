@@ -12,8 +12,8 @@
     <Grid RowDefinitions="30, *" >
         <Grid.ColumnDefinitions>
             <ColumnDefinition MinWidth="50" MaxWidth="250"></ColumnDefinition>
-            <ColumnDefinition Width="250"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition MinWidth="50" MaxWidth="320"></ColumnDefinition>
+            <ColumnDefinition Width="auto"></ColumnDefinition>
         </Grid.ColumnDefinitions>
          <!--ПЕРВАЯ БОКОВАЯ ПАНЕЛЬ ДЛЯ КОММИТОВ И ПРОСМОТР РЕПОЗИТОРИЙ -->
         <Border Grid.Column="0" Grid.RowSpan="2" Background="#25292E" BorderBrush="AntiqueWhite" CornerRadius="20">
@@ -28,7 +28,13 @@
                     <ComboBox></ComboBox>
                     <Button  Content="Changes"  HorizontalAlignment="Stretch"></Button>
                     <Button  Content="History" Width="auto" HorizontalAlignment="Stretch" ></Button>
-
+                    <ListBox ItemsSource="{Binding Pathtofile}" Height="145" Background="#1E2125">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </StackPanel>
                 <StackPanel  Orientation="Vertical" Grid.Row="1"  VerticalAlignment="Bottom">
                     <TextBox Text="{Binding Title}" Background="#1E2125" Foreground="White"></TextBox>
@@ -64,8 +70,9 @@
                 </ListBox.ItemTemplate>
             </ListBox>
         </Border>
+
+        <GridSplitter Grid.Column="1" Grid.RowSpan="2" Width="5" VerticalAlignment="Stretch" Background="#1C1E21" Cursor="SizeWE"  />
         <!--ТРЕТЬЯ ПАНЕЛЬ ДЛЯ ПРОСМОТР КОДА ИЗ ПАПКИ-->
-        <GridSplitter Grid.Column="0" Grid.RowSpan="2" Width="5" VerticalAlignment="Stretch" Background="#1C1E21" Cursor="SizeWE"  />
         <Grid Grid.Column="2" Grid.Row="1">
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" >
             <ItemsControl  ItemsSource="{Binding CodeLine}">
