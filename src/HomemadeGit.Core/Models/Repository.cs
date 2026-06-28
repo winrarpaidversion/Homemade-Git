@@ -10,6 +10,7 @@ namespace HomemadeGit.Core.Models
 
         public User Owner { get; set; }
         public int OwnerId { get; set; }
+        
 
         public Branch? DefaultBranch { get; set; }
         public int? DefaultBranchId { get; set; }
@@ -17,6 +18,7 @@ namespace HomemadeGit.Core.Models
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; } 
         public DateTime CreatedAt { get; set; }
+        public bool isPublic { get; set; }
 
         public ICollection<UserRepository> UserRepositories { get; set; } = new List<UserRepository>();
         public ICollection<Commit> Commits { get; set; } = new List<Commit>();

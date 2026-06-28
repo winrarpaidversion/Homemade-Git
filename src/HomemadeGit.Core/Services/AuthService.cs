@@ -9,11 +9,11 @@ namespace HomemadeGit.Core.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IUserStore _userRepository;
         private readonly IPasswordHasher _passwordHasher;
-        public AuthService(IUserRepository userRepository, IPasswordHasher passwordHasher) 
+        public AuthService(IUserStore userStore, IPasswordHasher passwordHasher) 
         {
-            _userRepository = userRepository;
+            _userRepository = userStore;
             _passwordHasher = passwordHasher;
         }
 
