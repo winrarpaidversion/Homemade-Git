@@ -102,7 +102,7 @@
             </Grid>
         </Border>
 
-        <GridSplitter Grid.Row="1" Grid.Column="1" Width="5" Background="#1C1E21" Cursor="SizeWE"/>
+      
 
         <!-- СРЕДНЯЯ ПАНЕЛЬ: Содержимое репозитория -->
         <Border Grid.Row="1" Grid.Column="2" Background="#25292E">
@@ -145,8 +145,8 @@
             </Grid>
         </Border>
 
-        <GridSplitter Grid.Row="1" Grid.Column="3" Width="5" Background="#1C1E21" Cursor="SizeWE"/>
 
+        <GridSplitter Grid.Row="1" Grid.Column="2" Width="5" Background="#1C1E21" Cursor="SizeWE"/>
         <!-- ПРАВАЯ ПАНЕЛЬ: Просмотр кода -->
         <Border Grid.Row="1" Grid.Column="4" Background="#1E2125">
             <Grid Margin="5">

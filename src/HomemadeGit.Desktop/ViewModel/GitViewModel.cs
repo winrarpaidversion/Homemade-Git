@@ -20,12 +20,14 @@ namespace HomemadeGit.Desktop.ViewModel
         private IDialogService _dialogService;
         private readonly RepositoryClientService _repositoryClientService;
 
-        // DTO для отображения в списке
+        public int SelectedRepositoryId => SelectedRepository?.Id ?? 0;
+
+    
         public record RepositoryListItem(int Id, string Name, string? Description, bool IsPublic);
         public record FileSystemItem(string Name, string FullPath, bool IsDirectory);
         public record TextLine(string Number, string Text);
 
-        // ===== СВОЙСТВА ДЛЯ ПРИВЯЗКИ В XAML =====
+
 
         [ObservableProperty]
         private string _searchQuery = string.Empty;
@@ -49,19 +51,19 @@ namespace HomemadeGit.Desktop.ViewModel
         private RepositoryResponse? _currentRepository;
 
         [ObservableProperty]
-        private bool _isPublic = true;  // ВАЖНО: для привязки к CheckBox
+        private bool _isPublic = true;  
 
         [ObservableProperty]
-        private string _statusMessage = "Готов";  // ВАЖНО: для строки статуса
+        private string _statusMessage = "Готов";  
 
         [ObservableProperty]
-        private ObservableCollection<RepositoryListItem> _repositories = new();  // ВАЖНО: называется Repositories
+        private ObservableCollection<RepositoryListItem> _repositories = new(); 
 
         [ObservableProperty]
-        private ObservableCollection<FileSystemItem> _pathToFile = new();  // ВАЖНО: называется PathToFile
+        private ObservableCollection<FileSystemItem> _pathToFile = new();  
 
         [ObservableProperty]
-        private ObservableCollection<TextLine> _codeLines = new();  // ВАЖНО: называется CodeLines
+        private ObservableCollection<TextLine> _codeLines = new(); 
 
         public GitViewModel(int userId, IDialogService dialogService, RepositoryClientService repositoryService)
         {
@@ -69,11 +71,11 @@ namespace HomemadeGit.Desktop.ViewModel
             _dialogService = dialogService;
             _repositoryClientService = repositoryService;
 
-            // Загружаем репозитории при старте
+       
             Task.Run(LoadRepositoriesAsync);
         }
 
-        // ===== КОМАНДЫ =====
+
 
         [RelayCommand]
         private async Task LoadRepositoriesAsync()
@@ -120,13 +122,13 @@ namespace HomemadeGit.Desktop.ViewModel
         }
 
         [RelayCommand]
-        private async Task SearchRepositoriesAsync()  // ВАЖНО: называется SearchRepositories
+        private async Task SearchRepositoriesAsync()
         {
             await LoadRepositoriesAsync();
         }
 
         [RelayCommand]
-        private async Task LoadRepositoryDetailsAsync()  // ВАЖНО: называется LoadRepositoryDetails
+        private async Task LoadRepositoryDetailsAsync()  
         {
             if (SelectedRepository == null)
             {
@@ -161,7 +163,7 @@ namespace HomemadeGit.Desktop.ViewModel
         }
 
         [RelayCommand]
-        private async Task CreateRepositoryAsync()  // ВАЖНО: называется CreateRepository
+        private async Task CreateRepositoryAsync()  
         {
             if (string.IsNullOrWhiteSpace(Title))
             {
@@ -237,7 +239,7 @@ namespace HomemadeGit.Desktop.ViewModel
         }
 
         [RelayCommand]
-        private void BrowseFolder()  // ВАЖНО: называется BrowseFolder
+        private void BrowseFolder()  
         {
             string? selectedPath = _dialogService.SelectFolder();
             if (!string.IsNullOrEmpty(selectedPath))
@@ -311,7 +313,7 @@ namespace HomemadeGit.Desktop.ViewModel
                 Debug.WriteLine($"LoadTextFile Error: {ex.Message}");
             }
         }
-
+      
         partial void OnSelectedItemChanged(FileSystemItem? value)
         {
             if (value == null) return;
@@ -322,7 +324,26 @@ namespace HomemadeGit.Desktop.ViewModel
             }
             else if (File.Exists(value.FullPath))
             {
-                string[] textExtensions = { ".txt", ".cs", ".xaml", ".xml", ".json", ".js", ".html", ".css", ".md", ".sql", ".yml", ".yaml" };
+                string[] textExtensions = {
+                    ".txt", ".md", ".markdown", ".mdown", ".mkd", ".mkdown",
+                    ".cs", ".xaml", ".xml", ".json", ".js", ".html", ".htm",
+                    ".css", ".sql", ".yml", ".yaml", ".h", ".c", ".cpp",
+                    ".hpp", ".java", ".py", ".rb", ".go", ".rs", ".php",
+                    ".config", ".props", ".targets", ".sln", ".csproj",
+                    ".gitignore", ".gitattributes", ".editorconfig",
+                    ".sh", ".bash", ".ps1", ".bat", ".cmd",
+                    ".conf", ".cfg", ".ini", ".env", ".properties",
+                    ".csv", ".tsv", ".log", ".readme", ".license",
+                    ".psd1", ".psm1", ".pssc", ".cdxml",
+                    ".jsonc", ".ts", ".tsx", ".jsx", ".vue",
+                    ".sass", ".scss", ".less", ".styl",
+                    ".dockerfile", ".makefile", ".cmake",
+                    ".gradle", ".groovy", ".lua", ".pl", ".pm",
+                    ".r", ".rmd", ".rnw", ".swift", ".kt", ".kts",
+                    ".fs", ".fsx", ".fsi", ".fsscript",
+                    ".vbs", ".vba", ".vb", ".vbp",
+                    ".asm", ".s", ".inc" 
+                };
                 string ext =System.IO.Path.GetExtension(value.FullPath).ToLower();
 
                 if (textExtensions.Contains(ext))
@@ -336,7 +357,6 @@ namespace HomemadeGit.Desktop.ViewModel
             }
         }
 
-        // Свойство для XAML
-        public int SelectedRepositoryId => SelectedRepository?.Id ?? 0;
+   
     }
 }

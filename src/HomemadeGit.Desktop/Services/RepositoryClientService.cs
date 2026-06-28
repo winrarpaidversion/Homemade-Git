@@ -144,7 +144,6 @@ namespace HomemadeGit.Desktop.Services
             }
         }
 
-        // Удаление репозитория
         public async Task<bool> DeleteRepositoryAsync(int repositoryId, int userId)
         {
             try
