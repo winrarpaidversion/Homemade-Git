@@ -17,6 +17,7 @@
                 <TextBox Text="{Binding Login}" Margin="10"></TextBox>
                 <TextBlock Text="введите новый пароль" HorizontalAlignment="Left" Margin="10"></TextBlock>
                 <TextBox Text="{Binding Password}" Margin="10"  ></TextBox>
+                <TextBlock Text="{Binding TitleError}" Foreground="Red"   Visibility="{Binding IsError}" IsEnabled="False" ></TextBlock>
                 <Button Command="{Binding SignUpCommand}"  Width="120" Height="30" Margin="10"  Content="войти"></Button>
                 <Button Command="{Binding GoToSignInCommand}" Width="120" Height="30"  Margin="10" Content="Авторизироваться"></Button>
             </StackPanel>

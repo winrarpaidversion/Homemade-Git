@@ -1,4 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using HomemadeGit.Core.Services;
+using HomemadeGit.Desktop.Services;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,12 +11,7 @@ namespace HomemadeGit.Desktop.ViewModel
     {
         [ObservableProperty]
         private object? _currentPage;
-        private fakeauth Fakeauth;
+        private AuthClientService AuthClientService;
 
-        public MainViewModel(fakeauth fakeauth)
-        {
-            Fakeauth = fakeauth;
-            CurrentPage = new RegisterViewModel(fakeauth, this);
-        }
     }
 }

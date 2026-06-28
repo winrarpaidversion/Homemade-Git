@@ -1,4 +1,6 @@
-﻿using HomemadeGit.Desktop.ViewModel;
+﻿
+using HomemadeGit.Desktop.Services;
+using HomemadeGit.Desktop.ViewModel;
 
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -20,13 +22,35 @@ namespace HomemadeGit.Desktop
         private static IServiceProvider ConfigureServices()
         {
             var services = new ServiceCollection();
-          
-            services.AddSingleton<fakeauth>();
+            services.AddSingleton<IDialogService, DialogService>();
+            services.AddSingleton<AuthClientService>();
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<RegisterViewModel>();
-            services.AddSingleton<GitViewModel>();
+            services.AddSingleton<RepositoryClientService>();
+            services.AddSingleton<Func<int, GitViewModel>>(sp => id =>
+              ActivatorUtilities.CreateInstance<GitViewModel>(sp, id));
+            services.AddHttpClient();
+            services.AddSingleton<MainWindow>();
+   
+
 
             return services.BuildServiceProvider();
+        }
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            // 1. Достаем сервисы из контейнера
+            var mainViewModel = Services.GetRequiredService<MainViewModel>();
+            var registerViewModel = Services.GetRequiredService<RegisterViewModel>();
+            var mainWindow = Services.GetRequiredService<MainWindow>();
+
+            // 2. Связываем их между собой (разорвав ту самую циклическую зависимость)
+            mainViewModel.CurrentPage = registerViewModel;
+            mainWindow.DataContext = mainViewModel;
+
+            // 3. Показываем окно
+            mainWindow.Show();
         }
     }
 
