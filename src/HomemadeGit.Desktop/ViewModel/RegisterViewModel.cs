@@ -1,5 +1,5 @@
 ﻿
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HomemadeGit.Core.Services;
 using HomemadeGit.Desktop.Services;
@@ -19,29 +19,68 @@ namespace HomemadeGit.Desktop.ViewModel
         private bool _isCheck = false;
         private AuthClientService AuthClientService;
         private MainViewModel MainViewModel;
-        public RegisterViewModel(AuthClientService authClientService, MainViewModel mainViewModel)
+        [ObservableProperty]
+        private string _isError = "Hidden";
+        [ObservableProperty]
+        private string _titleError;
+
+        private readonly Func<int, GitViewModel> _gitviewModelFactory;
+
+        public RegisterViewModel(AuthClientService authClientService, MainViewModel mainViewModel, Func<int, GitViewModel> gitviewModelFactory)
         {
+
             AuthClientService = authClientService;
             MainViewModel = mainViewModel;
+            _gitviewModelFactory = gitviewModelFactory;
         }
         [RelayCommand]
         public void SignUp()
         {
+
             var regiserResult = AuthClientService.Register(Login, Password);
-            if(regiserResult != null)
+            if (string.IsNullOrWhiteSpace(Login) || string.IsNullOrWhiteSpace(Password))
             {
-                MainViewModel.CurrentPage = new GitViewModel();
+                TitleError = "Введите все поля";
+                IsError = "Visible";
+                return;
             }
-          
+            if (regiserResult.Id != 0)
+            {
+
+                MainViewModel.CurrentPage = _gitviewModelFactory(regiserResult.Id);
+
+            }
+            else
+            {
+
+                IsError = "Visible";
+                return;
+            }
+
+
         }
         [RelayCommand]
         public void SignIn()
         {
-            var loginResult = AuthClientService.Login(Login, Password);
-            if (loginResult != null)
+            if (string.IsNullOrWhiteSpace(Login) || string.IsNullOrWhiteSpace(Password))
             {
-                MainViewModel.CurrentPage = new GitViewModel();
+                TitleError = "Введите все поля";
+                IsError = "Visible";
+                return;
             }
+            var loginResult = AuthClientService.Login(Login, Password);
+            if (loginResult.Id != 0)
+            {
+                MainViewModel.CurrentPage = _gitviewModelFactory(loginResult.Id);
+
+            }
+            else
+            {
+                TitleError = $"Такого пользователя нет: {loginResult.Exception}";
+                IsError = "Visible";
+
+                return;
+            } 
 
         }
 

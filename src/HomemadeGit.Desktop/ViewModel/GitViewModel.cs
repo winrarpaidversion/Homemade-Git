@@ -33,8 +33,11 @@ namespace HomemadeGit.Desktop.ViewModel
         [ObservableProperty]
         public ObservableCollection<textLine> _codeLine = new ObservableCollection<textLine>();
 
-        public GitViewModel()
+        public int UserId;
+
+        public GitViewModel(int userId)
         {
+            UserId = userId;
             DialogService = new DialogService();
         }
         [RelayCommand]
@@ -64,7 +67,7 @@ namespace HomemadeGit.Desktop.ViewModel
                     string parentDir = Directory.GetParent(targetPath)?.FullName;
                     if (parentDir != null)
                     {
-                        pathtofile.Add(new FileSystemItem(".. [Назад]", parentDir, true));
+                        pathtofile.Add(new FileSystemItem("...", parentDir, true));
                     }
                 }
 

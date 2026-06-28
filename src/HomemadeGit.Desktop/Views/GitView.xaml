@@ -12,7 +12,7 @@
     <Grid RowDefinitions="30, *" >
         <Grid.ColumnDefinitions>
             <ColumnDefinition MinWidth="50" MaxWidth="250"></ColumnDefinition>
-            <ColumnDefinition Width="300"></ColumnDefinition>
+            <ColumnDefinition Width="250"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
          <!--ПЕРВАЯ БОКОВАЯ ПАНЕЛЬ ДЛЯ КОММИТОВ И ПРОСМОТР РЕПОЗИТОРИЙ -->
@@ -22,10 +22,8 @@
                 <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
                     <Menu>
                         <MenuItem Header="File" >
-                            <MenuItem Header="Check File" Command="{Binding NewRepositoryCommand}"/>
+                            <MenuItem Header="New Repository" Command="{Binding NewRepositoryCommand}"/>
                         </MenuItem>
-
-
                     </Menu>
                     <ComboBox></ComboBox>
                     <Button  Content="Changes"  HorizontalAlignment="Stretch"></Button>

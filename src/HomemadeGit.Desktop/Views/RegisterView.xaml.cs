@@ -23,7 +23,7 @@ namespace HomemadeGit.Desktop.Views
         public RegisterView()
         {
             InitializeComponent();
-            DataContext = (Application.Current as App).Services.GetService<RegisterViewModel>();
+           
         }
     }
 }
