@@ -5,7 +5,7 @@ using System.Text;
 
 namespace HomemadeGit.Core.Interfaces
 {
-    public interface IUserRepository
+    public interface IUserStore
     {
         Task<User?> GetByLoginAsync(string login);
         Task<User?> GetByIdAsync(int id);

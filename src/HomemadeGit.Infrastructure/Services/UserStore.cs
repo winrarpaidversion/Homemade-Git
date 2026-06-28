@@ -9,11 +9,11 @@ using System.Text;
 
 namespace HomemadeGit.Infrastructure.Services
 {
-    public class UserRepository : IUserRepository
+    public class UserStore : IUserStore
     {
         private readonly AppDbContext _dbContext;
 
-        public UserRepository(AppDbContext dbContext)
+        public UserStore(AppDbContext dbContext)
         {
             _dbContext = dbContext;
         }
