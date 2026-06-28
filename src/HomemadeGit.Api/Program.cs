@@ -22,12 +22,17 @@ namespace HomemadeGit.Api
 
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IRepositoryService, RepositoryService>();
+            builder.Services.AddScoped<ICommitService, CommitService>();
 
             builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
-
+            builder.Services.AddScoped<IObjectHasher, Sha256ObjectHasher>();
+            
             builder.Services.AddScoped<IUserStore, UserStore>();
             builder.Services.AddScoped<IBranchStore, BranchStore>();
             builder.Services.AddScoped<IRepositoryStore, RepositoryStore>();
+            builder.Services.AddScoped<ICommitStore, CommitStore>();
+            builder.Services.AddScoped<IBlobStore, BlobStore>();
+
 
             builder.Services.AddDbContext<AppDbContext>(options =>
             {
