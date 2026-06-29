@@ -1,4 +1,5 @@
-﻿using HomemadeGit.Core.DTOs.Commits;
+﻿using HomemadeGit.Core.DTOs;
+using HomemadeGit.Core.DTOs.Commits;
 using HomemadeGit.Core.Interfaces;
 using HomemadeGit.Core.Models;
 using System;
@@ -22,6 +23,44 @@ namespace HomemadeGit.Core.Services
             _commitStore = commitStore;
             _blobStore = blobStore;
             _objectHasher = objectHasher;
+        }
+
+        public async Task<RepositorySnapshotResponse> CloneRepositoryAsync(int userId, int repositoryId, int? branchId)
+        {
+            var repository = await _repositoryStore.GetByIdAsync(repositoryId);
+
+            if (repository == null)
+            {
+                throw new Exception("repository not found");
+            }
+
+            if (!CanRead(repository, userId))
+                throw new Exception("denied");
+
+            Branch? branch;
+
+            if (branchId.HasValue)
+                branch = await _branchStore.GetByIdAsync(branchId.Value);
+            else
+                branch = await _branchStore.GetDefaultBranchAsync(repositoryId);
+
+            if (branch == null)
+                throw new Exception("branch not found");
+
+            if (branch.RepositoryId != repositoryId)
+                throw new Exception("branch belongs to another repository");
+
+            if (branch.HeadCommitId == null)
+                throw new Exception("branch has no commits");
+
+            var snapshot = await GetCommitSnapshotAsync(userId, branch.HeadCommitId.Value);
+
+            snapshot.BranchId = branch.Id;
+            snapshot.BranchName = branch.Name;
+            snapshot.RepositoryId = repository.Id;
+            snapshot.RepositoryName = repository.Name;
+
+            return snapshot;
         }
 
         public async Task<CommitResponse> CreateCommitAsync(int userId, int repositoryId, int branchId, CreateCommitRequest request)
@@ -127,6 +166,35 @@ namespace HomemadeGit.Core.Services
             return MapToResponse(commit);
         }
 
+        public async Task<RepositorySnapshotResponse> GetCommitSnapshotAsync(int userId, int commitId)
+        {
+            var commit = await _commitStore.GetByIdAsync(commitId);
+
+            if (commit == null)
+                throw new Exception("commit not found");
+
+            if (!CanRead(commit.Repository, userId))
+                throw new Exception("denied");
+
+            return new RepositorySnapshotResponse
+            {
+                RepositoryId = commit.RepositoryId,
+                RepositoryName = commit.Repository.Name,
+
+                CommitId = commit.Id,
+                CommitHash = commit.Hash,
+
+                Files = commit.CommitFiles.Select(cf => new SnapshotFileResponse
+                {
+                    Path=cf.Path,
+                    BlobHash=cf.Blob.Hash,
+                    Size=cf.Blob.Size,
+                    Data=cf.Blob.Data,
+
+                }).OrderBy(f => f.Path).ToList()
+            };
+        }
+
         public async Task<List<CommitListItemResponse>> GetRepositoryCommitsAsync(int userId, int repositoryId)
         {
             var repository = await _repositoryStore.GetByIdAsync(repositoryId);
@@ -149,6 +217,37 @@ namespace HomemadeGit.Core.Services
                 UserId = c.UserId,
                 AuthorLogin = c.User?.Login ?? string.Empty
             }).ToList();
+        }
+
+        public async Task ResetBranchToCommitAsync(int userId, int repositoryId, int branchId, ResetBranchRequest request)
+        {
+            var repository = await _repositoryStore.GetByIdAsync(repositoryId);
+
+            if (repository == null)
+                throw new Exception("repository not found");
+
+            if (!CanWrite(repository, userId))
+                throw new Exception("denied");
+
+            var branch = await _branchStore.GetByIdAsync(branchId);
+
+            if (branch == null)
+                throw new Exception("branch not found");
+
+            if (branch.RepositoryId != repositoryId)
+                throw new Exception("branch belongs to another repository");
+
+            var commit = await _commitStore.GetByIdAsync(request.CommitId);
+
+            if (commit == null)
+                throw new Exception("commit not found");
+
+            if (commit.RepositoryId != repositoryId)
+                throw new Exception("commit belongs to another repository");
+
+            branch.HeadCommitId = commit.Id;
+
+            await _branchStore.UpdateAsync(branch);
         }
 
         private bool CanRead(Repository repository, int userId)

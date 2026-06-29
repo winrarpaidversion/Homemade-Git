@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800"
+             d:DesignHeight="450" d:DesignWidth="1000"
              xmlns:vm="clr-namespace:HomemadeGit.Desktop.ViewModel"
              d:DataContext="{d:DesignInstance Type=vm:GitViewModel}">
 
@@ -19,11 +19,22 @@
             <ColumnDefinition Width="300"/>
             <ColumnDefinition Width="5"/>
             <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- Строка статуса -->
-        <Border Grid.Row="0" Grid.ColumnSpan="5" Background="#2C3136" Padding="5,0">
-            <TextBlock Text="{Binding StatusMessage}" Foreground="#8A8F98" FontSize="12" VerticalAlignment="Center"/>
+        <Border Grid.Row="0" Grid.ColumnSpan="6" Background="#2C3136" Padding="5,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" >
+
+                <TextBlock Text="{Binding StatusMessage}" Foreground="#8A8F98" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                <ComboBox Name="Ветки"  Text="Ветка" ItemsSource="{Binding Branch}"  HorizontalAlignment="Center" >
+                    <ComboBoxItem>
+                        <DataTemplate>
+                            <TextBlock FontWeight="Bold" Text="{Binding}"></TextBlock>
+                        </DataTemplate>
+                    </ComboBoxItem>
+                </ComboBox>
+            </StackPanel>
         </Border>
 
         <!-- ЛЕВАЯ ПАНЕЛЬ: Список репозиториев и создание -->
@@ -101,47 +112,74 @@
                         Content="➕ Создать" Height="30" Background="#285496" Foreground="White" BorderThickness="0"/>
             </Grid>
         </Border>
-        <!--ПАНЕЛЬ КОММИТОВ -->
-        <Border Grid.Column="1" Grid.Row="1">
-            <Grid RowDefinitions="*,*">
-                <ListBox ItemsSource="{Binding  Commits}" Background="#1E2125" Foreground="White" ScrollViewer.HorizontalScrollBarVisibility="Auto" >
+        <!--ИСТОРИЯ КОММИТОВ-->
+        <Border Grid.Column="1" Grid.Row="2">
+            <Grid RowDefinitions="auto,*">
+                <StackPanel Grid.Row="0" Orientation="Horizontal" >
+                    <TextBlock Text="Коммиты" Foreground="White" FontWeight="Bold" HorizontalAlignment="Left"/>
+
+                </StackPanel>
+                <ListBox ItemsSource="{Binding Historycommits}" Background="#1E2125" Foreground="White" Grid.Row="1"  SelectedItem="{Binding SelectedCommit}" >
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel>
-                                <TextBlock Text="{Binding RepositoryId}"/>
-                                <TextBlock Text="{Binding AuthorLogin}"/>
-                                <ItemsControl ItemsSource="{Binding Files}">
-                                    <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Path}"></TextBlock>
-                              
-                                    </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                                <TextBlock Text="{Binding  Hash}"/>
-                                <TextBlock Text="{Binding   CreatedAt}"/>
-                                <TextBlock Text="{Binding  CommitMessage}"/>
-                                <TextBlock Text="{Binding   Message}"/>
-
-
+                            <StackPanel Margin="5">
+                                <TextBlock Text="{Binding  AuthorLogin}" FontWeight="Bold" Foreground="White"/>
+                                <TextBlock Text="{Binding  Title}" Foreground="Gray"/>
+                                <TextBlock Text="{Binding  Description}" Foreground="Gray"/>
+                     
                             </StackPanel>
-
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <StackPanel Grid.Row="1">
-                    <TextBlock Text="Title" Foreground="White"></TextBlock>
-                    <TextBox Text="{Binding TitleCommit}"  Margin="0,5"/>
-                    <TextBlock Text="Description" Foreground="White"></TextBlock>
-                    <TextBox Text="{Binding DescriptionCommit}"  Margin="0,5"/>
-                    <Button Command="{Binding NewCommitCommand}" Content="Закоммитить" Background="#285496" Foreground="White"/>
+            </Grid>
+        </Border>
+        <!--ПАНЕЛЬ КОММИТОВ -->
+        <Border Grid.Column="2" Grid.Row="1">
+            <Grid RowDefinitions="*,*">
+                <ScrollViewer  HorizontalScrollBarVisibility="Auto">
+                <ListBox ItemsSource="{Binding Commits}" Background="#1E2125" Foreground="White" ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="5">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <TextBlock Text="Репозиторий: " Foreground="#6A6F78" FontSize="12"/>
+                                    <TextBlock Text="{Binding DataContext.SelectedRepository.Name, RelativeSource={RelativeSource AncestorType=ListBox}}" Foreground="#4A90E2" FontWeight="Bold" FontSize="12"/>
+                                </StackPanel>
+
+                                <TextBlock Text="{Binding AuthorLogin}" Foreground="#859900" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Hash}" Foreground="#6A6F78" FontSize="11"/>
+
+                                <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="Bold" Margin="0,3"/>
+                                <TextBlock Text="{Binding Description}" Foreground="#A0A0A0" TextWrapping="Wrap" Margin="0,0,0,5"/>
+
+                                <TextBlock Text="Измененные файлы:" Foreground="#6A6F78" FontSize="11" Margin="0,3,0,0"/>
+                                <ItemsControl ItemsSource="{Binding Files}" Margin="10,0,0,5">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Path}" Foreground="#D7BA7D" Margin="0,1"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <TextBlock Text="{Binding CreatedAt, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Foreground="#6A6F78" FontSize="11"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                </ScrollViewer>
+                <StackPanel Grid.Row="1" Margin="10">
+                    <TextBlock Text="Title" Foreground="White"/>
+                    <TextBox Text="{Binding TitleCommit}" Margin="0,5"/>
+                    <TextBlock Text="Description" Foreground="White"/>
+                    <TextBox Text="{Binding DescriptionCommit}" Margin="0,5"/>
+                    <Button Command="{Binding NewCommitCommand}" Content="Закоммитить" Background="#285496" Foreground="White" Padding="0,5"/>
                 </StackPanel>
             </Grid>
         </Border>
 
 
         <!-- СРЕДНЯЯ ПАНЕЛЬ: Содержимое репозитория -->
-        <Border Grid.Row="1" Grid.Column="2" Background="#25292E">
+        <Border Grid.Row="1" Grid.Column="4" Background="#25292E">
             <Grid Margin="10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -181,10 +219,9 @@
             </Grid>
         </Border>
 
-        <GridSplitter Grid.Row="1" Grid.Column="3" Width="5" Background="#1C1E21" Cursor="SizeWE"/>
 
         <!-- ПРАВАЯ ПАНЕЛЬ: Просмотр кода -->
-        <Border Grid.Row="1" Grid.Column="4" Background="#1E2125">
+        <Border Grid.Row="1" Grid.Column="5" Background="#1E2125">
             <Grid Margin="5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>

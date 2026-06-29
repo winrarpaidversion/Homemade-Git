@@ -17,6 +17,7 @@ namespace HomemadeGit.Desktop.ViewModel
 {
     public partial class GitViewModel : ViewModelBase
     {
+
         private int UserId;
         [ObservableProperty]
         private string _TitleCommit;
@@ -26,8 +27,14 @@ namespace HomemadeGit.Desktop.ViewModel
         private IDialogService _dialogService;
         private readonly RepositoryClientService _repositoryClientService;
         private readonly CommitClientService _commitClientService;
+<<<<<<< HEAD
         private readonly BranchClientService _branchClientService;
         private Dictionary<int, string> _repositoryLocalPaths = new();
+=======
+
+        [ObservableProperty]
+        private CommitListItemResponse? _selectedCommit;
+>>>>>>> ea119a82fbc1c01a107ffd57216c0314c955b17b
 
         // DTO для отображения в списке
         public record RepositoryListItem(int Id, string Name, string? Description, bool IsPublic);
@@ -57,8 +64,6 @@ namespace HomemadeGit.Desktop.ViewModel
         [ObservableProperty]
         private RepositoryResponse? _currentRepository;
 
-        
-
         [ObservableProperty]
         private bool _isPublic = true;  // ВАЖНО: для привязки к CheckBox
 
@@ -67,8 +72,12 @@ namespace HomemadeGit.Desktop.ViewModel
 
         [ObservableProperty]
         private ObservableCollection<RepositoryListItem> _repositories = new();  // ВАЖНО: называется Repositories
+
         [ObservableProperty]
-        private ObservableCollection<CommitResponse> _commits = new(); 
+        private ObservableCollection<CommitListItemResponse> _historycommits = new();
+
+        [ObservableProperty]
+        private ObservableCollection<CommitResponse> _commits = new();
 
         [ObservableProperty]
         private ObservableCollection<FileSystemItem> _pathToFile = new();  // ВАЖНО: называется PathToFile
@@ -76,20 +85,128 @@ namespace HomemadeGit.Desktop.ViewModel
         [ObservableProperty]
         private ObservableCollection<TextLine> _codeLines = new();  // ВАЖНО: называется CodeLines
 
+<<<<<<< HEAD
         public GitViewModel(int userId, IDialogService dialogService, RepositoryClientService repositoryService, CommitClientService commitClientService, BranchClientService branchClientService)
+=======
+        private string TitleRepository => _selectedRepository.Name;
+        public GitViewModel(int userId, IDialogService dialogService, RepositoryClientService repositoryService, CommitClientService commitClientService)
+>>>>>>> ea119a82fbc1c01a107ffd57216c0314c955b17b
         {
             UserId = userId;
             _dialogService = dialogService;
             _repositoryClientService = repositoryService;
             _commitClientService = commitClientService;
+<<<<<<< HEAD
             _branchClientService = branchClientService;
+=======
+
+
+>>>>>>> ea119a82fbc1c01a107ffd57216c0314c955b17b
             // Загружаем репозитории при старте
             Task.Run(LoadRepositoriesAsync);
         }
 
         // ===== КОМАНДЫ =====
 
+        private async Task LoadCommitAsync()
+        {
+            if (SelectedRepository == null)
+            {
+                StatusMessage = "Выберите репозиторий для загрузки коммитов.";
+                return;
+            }
+            try
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    StatusMessage = "Загрузка коммитов...";
+                });
+
+                var commits = await _commitClientService.GetRepositoryCommitsAsync(UserId, SelectedRepository.Id);
+
+                // Безопасное обновление коллекции в UI-потоке
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    Historycommits.Clear();
+                    if (commits != null)
+                    {
+                        foreach (var commit in commits)
+                        {
+                            Historycommits.Add(commit);
+                        }
+                        StatusMessage = "Коммиты загружены.";
+                    }
+                    else
+                    {
+                        StatusMessage = "Коммиты не найдены.";
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    StatusMessage = $"Ошибка при загрузке коммитов: {ex.Message}";
+                });
+            }
+        }
+
         [RelayCommand]
+        public async Task LoadCommitDetailsAsync()
+        {
+            if (SelectedCommit == null || SelectedRepository == null) return;
+
+            try
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    StatusMessage = $"Загрузка деталей коммита {SelectedCommit.Title}...";
+                });
+
+                var commitDetails = await _commitClientService.GetCommitByIdAsync(UserId, SelectedCommit.Id);
+
+                if (commitDetails != null)
+                {
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        // 1. Показываем информацию о самом коммите на центральной панели
+                        Commits.Clear();
+                        Commits.Add(commitDetails);
+
+                        // 2. Распаковываем пути файлов и добавляем в панель файлов
+                        PathToFile.Clear();
+                        if (commitDetails.Files != null)
+                        {
+                            foreach (var file in commitDetails.Files)
+                            {
+                                PathToFile.Add(new FileSystemItem(
+                                    Name: System.IO.Path.GetFileName(file.Path),
+                                    FullPath: file.Path,
+                                    IsDirectory: false));
+                            }
+                        }
+
+                        StatusMessage = $"Коммит {SelectedCommit.Title} загружен.";
+                    });
+                }
+                else
+                {
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        StatusMessage = "Не удалось загрузить детали коммита.";
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    StatusMessage = $"Ошибка при загрузке коммита: {ex.Message}";
+                });
+                Debug.WriteLine($"LoadCommitDetailsAsync Error: {ex.Message}");
+            }
+        }
+
         private async Task LoadRepositoriesAsync()
         {
             try
@@ -134,13 +251,13 @@ namespace HomemadeGit.Desktop.ViewModel
         }
 
         [RelayCommand]
-        private async Task SearchRepositoriesAsync()  // ВАЖНО: называется SearchRepositories
+        private async Task SearchRepositoriesAsync()
         {
             await LoadRepositoriesAsync();
         }
 
         [RelayCommand]
-        private async Task LoadRepositoryDetailsAsync()  // ВАЖНО: называется LoadRepositoryDetails
+        private async Task LoadRepositoryDetailsAsync()
         {
             if (SelectedRepository == null)
             {
@@ -160,23 +277,8 @@ namespace HomemadeGit.Desktop.ViewModel
                     Title = repo.Name;
                     Description = repo.Description ?? string.Empty;
                     IsPublic = repo.isPublic;
-
-                    if (_repositoryLocalPaths.TryGetValue(SelectedRepository.Id, out var savedPath))
-                    {
-                        _repositoryRoot = savedPath;
-                        Path = savedPath;
-                        LoadFolderContent(savedPath);
-                        StatusMessage = $"Загружен: {repo.Name}";
-                    }
-                    else
-                    {
-                        _repositoryRoot = string.Empty;
-                        Path = string.Empty;
-                        PathToFile.Clear();
-                        CodeLines.Clear();
-
-                        StatusMessage = $"Загружен: {repo.Name}. Локальная папка не выбрана";
-                    }
+                    StatusMessage = $"Загружен: {repo.Name}";
+                    await LoadCommitAsync();
                 }
                 else
                 {
@@ -191,22 +293,11 @@ namespace HomemadeGit.Desktop.ViewModel
         }
 
         [RelayCommand]
-        private async Task CreateRepositoryAsync()  // ВАЖНО: называется CreateRepository
+        private async Task CreateRepositoryAsync()
         {
             if (string.IsNullOrWhiteSpace(Title))
             {
                 StatusMessage = "Введите название репозитория";
-                return;
-            }
-
-            string? selectedPath = _repositoryRoot;
-
-            if (string.IsNullOrWhiteSpace(selectedPath))
-                selectedPath = _dialogService.SelectFolder();
-
-            if (string.IsNullOrEmpty(selectedPath))
-            {
-                StatusMessage = "Выберите папку для репозитория";
                 return;
             }
 
@@ -223,13 +314,6 @@ namespace HomemadeGit.Desktop.ViewModel
 
                 if (result != null)
                 {
-                    _repositoryLocalPaths[result.Id] = selectedPath;
-                    _repositoryRoot = selectedPath;
-                    Path = selectedPath;
-                    LoadFolderContent(selectedPath);
-
-                    SelectedRepository = new RepositoryListItem(result.Id, result.Name, result.Description, result.isPublic);
-
                     StatusMessage = $"Репозиторий '{result.Name}' создан!";
                     Title = string.Empty;
                     Description = string.Empty;
@@ -249,9 +333,8 @@ namespace HomemadeGit.Desktop.ViewModel
         }
 
         [RelayCommand]
-        private async Task NewCommitAsync() 
+        private async Task NewCommitAsync()
         {
-  
             if (SelectedRepository == null)
             {
                 StatusMessage = "Выберите репозиторий.";
@@ -274,7 +357,6 @@ namespace HomemadeGit.Desktop.ViewModel
             {
                 StatusMessage = "Создание коммита...";
 
-                // 2. Вызов сервиса
                 var createdCommit = await _commitClientService.CreateCommitFormFolderAsync(
                     UserId,
                     SelectedRepository.Id,
@@ -283,18 +365,14 @@ namespace HomemadeGit.Desktop.ViewModel
                     DescriptionCommit
                 );
 
-
-                // 3. Обработка результата
                 if (createdCommit != null)
                 {
-                    // Добавляем созданный коммит в список
                     Commits.Add(createdCommit);
-
                     StatusMessage = $"Коммит '{createdCommit.Title}' успешно создан.";
 
-                    // Очистка полей ввода после успеха
                     TitleCommit = string.Empty;
                     DescriptionCommit = string.Empty;
+                    await LoadCommitAsync();
                 }
                 else
                 {
@@ -307,7 +385,6 @@ namespace HomemadeGit.Desktop.ViewModel
                 Debug.WriteLine($"NewCommit Error: {ex.Message}");
             }
         }
-
 
         [RelayCommand]
         private async Task DeleteRepositoryAsync()
@@ -346,7 +423,7 @@ namespace HomemadeGit.Desktop.ViewModel
         }
 
         [RelayCommand]
-        private void BrowseFolder()  // ВАЖНО: называется BrowseFolder
+        private void BrowseFolder()
         {
             string? selectedPath = _dialogService.SelectFolder();
             if (!string.IsNullOrEmpty(selectedPath))
@@ -432,7 +509,7 @@ namespace HomemadeGit.Desktop.ViewModel
             else if (File.Exists(value.FullPath))
             {
                 string[] textExtensions = { ".txt", ".cs", ".xaml", ".xml", ".json", ".js", ".html", ".css", ".md", ".sql", ".yml", ".yaml" };
-                string ext =System.IO.Path.GetExtension(value.FullPath).ToLower();
+                string ext = System.IO.Path.GetExtension(value.FullPath).ToLower();
 
                 if (textExtensions.Contains(ext))
                 {
@@ -442,6 +519,23 @@ namespace HomemadeGit.Desktop.ViewModel
                 {
                     StatusMessage = $"Файл {System.IO.Path.GetFileName(value.FullPath)} не является текстовым";
                 }
+            }
+        }
+
+        partial void OnSelectedRepositoryChanged(RepositoryListItem? value)
+        {
+            if (value != null)
+            {
+                LoadRepositoryDetailsCommand.Execute(null);
+            }
+        }
+
+        partial void OnSelectedCommitChanged(CommitListItemResponse? value)
+        {
+            if (value != null)
+            {
+                // ИСПРАВЛЕНО: Вызываем сгенерированную команду LoadCommitDetailsCommand
+                LoadCommitDetailsCommand.Execute(null);
             }
         }
 
