@@ -113,11 +113,24 @@
             </Grid>
         </Border>
         <!--ИСТОРИЯ КОММИТОВ-->
-        <Border Grid.Column="1" Grid.Row="2">
+        <Border Grid.Column="1" Grid.Row="1">
             <Grid RowDefinitions="auto,*">
                 <StackPanel Grid.Row="0" Orientation="Horizontal" >
                     <TextBlock Text="Коммиты" Foreground="White" FontWeight="Bold" HorizontalAlignment="Left"/>
+                    
+                    <Button Command="{Binding CloneRepositoryCommand}" Content="Клонировать"
+                            Background="#285496"
+                            Foreground="White"
+                            Margin="0,5,0,0"
+                            Height="25"
+                            BorderThickness="0"/>
 
+                    <Button Command="{Binding ResetToCommitCommand}" Content="Откатиться к коммиту" 
+                            Background="#963528" 
+                            Foreground="White" 
+                            Margin="0,5,0,5" 
+                            Height="25"
+                            BorderThickness="0"/>
                 </StackPanel>
                 <ListBox ItemsSource="{Binding Historycommits}" Background="#1E2125" Foreground="White" Grid.Row="1"  SelectedItem="{Binding SelectedCommit}" >
                     <ListBox.ItemTemplate>

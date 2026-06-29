@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GalaSoft.MvvmLight.Views;
+using HomemadeGit.Core.DTOs;
+using HomemadeGit.Core.DTOs.Branches;
 using HomemadeGit.Core.DTOs.Commits;
 using HomemadeGit.Core.DTOs.Repositories;
 using HomemadeGit.Core.Models;
@@ -79,6 +81,10 @@ namespace HomemadeGit.Desktop.ViewModel
 
         [ObservableProperty]
         private ObservableCollection<TextLine> _codeLines = new();  // ВАЖНО: называется CodeLines
+
+        [ObservableProperty]
+        private BranchResponse? _selectedBranch;
+
 
         private string TitleRepository => _selectedRepository.Name;
         public GitViewModel(int userId, IDialogService dialogService, RepositoryClientService repositoryService, CommitClientService commitClientService)
@@ -328,7 +334,7 @@ namespace HomemadeGit.Desktop.ViewModel
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(Path) || !Directory.Exists(Path))
+            if (string.IsNullOrWhiteSpace(Path) || !Directory.Exists(_repositoryRoot))
             {
                 StatusMessage = "Выберите корректную папку для коммита.";
                 return;
@@ -347,7 +353,8 @@ namespace HomemadeGit.Desktop.ViewModel
                 var createdCommit = await _commitClientService.CreateCommitFormFolderAsync(
                     UserId,
                     SelectedRepository.Id,
-                    Path,
+                    _repositoryRoot,
+                    SelectedBranch.Id,
                     TitleCommit,
                     DescriptionCommit
                 );
@@ -420,6 +427,138 @@ namespace HomemadeGit.Desktop.ViewModel
                 LoadFolderContent(selectedPath);
                 StatusMessage = $"Выбрана папка: {selectedPath}";
             }
+        }
+
+        [RelayCommand]
+        private async Task CloneRepositoryAsync()
+        {
+            if (SelectedRepository == null)
+            {
+                StatusMessage = "Выберите репозиторий для клонирования";
+                return;
+            }
+
+            var targetFolder = _dialogService.SelectFolder();
+
+            if (string.IsNullOrWhiteSpace(targetFolder))
+            {
+                StatusMessage = "Выберите папку для клонирования.";
+                return;
+            }
+
+            try
+            {
+                StatusMessage = "Клонирование репозитория...";
+
+                var snapshot = await _commitClientService.CloneRepositoryAsync(UserId, SelectedRepository.Id, SelectedBranch.Id);
+
+                if(snapshot == null)
+                {
+                    StatusMessage = "Не удалось получить snapshot репозитория";
+                    return;
+                }
+
+                ApplySnapshotToFolder(snapshot, targetFolder);
+
+                StatusMessage = $"Репозиторий '{snapshot.RepositoryName}' склонирован в {targetFolder}";
+
+                await LoadCommitAsync();
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Ошибка клонирования: {ex.Message}";
+                Debug.WriteLine($"CloneRepository Error: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        private async Task ResetToCommitAsync()
+        {
+            if (SelectedRepository == null)
+            {
+                StatusMessage = "Выберите репозиторий.";
+                return;
+            }
+
+            if (SelectedCommit == null)
+            {
+                StatusMessage = "Выберите коммит для отката.";
+                return;
+            }
+
+            if (SelectedBranch == null)
+            {
+                StatusMessage = "Выберите ветку для отката.";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(_repositoryRoot) || !Directory.Exists(_repositoryRoot))
+            {
+                StatusMessage = "Выберите локальную папку репозитория.";
+                return;
+            }
+
+            try
+            {
+                StatusMessage = $"Откат ветки до коммита '{SelectedCommit.Title}'...";
+
+                await _commitClientService.ResetBranchToCommitAsync(UserId, SelectedRepository.Id, SelectedBranch.Id, SelectedCommit.Id);
+
+                var snapshot = await _commitClientService.GetCommitSnapshotAsync(UserId, SelectedCommit.Id);
+
+                if(snapshot == null)
+                {
+                    StatusMessage = "Откат выполнен, но snapshot не получен";
+                    await LoadCommitAsync();
+                    return;
+                }
+
+                ApplySnapshotToFolder(snapshot, _repositoryRoot);
+
+                StatusMessage = $"Откат выполнен до коммита '{SelectedCommit.Title}'";
+
+                await LoadCommitAsync();
+            }
+            catch(Exception ex)
+            {
+                StatusMessage = $"Ошибка отката: {ex.Message}";
+                Debug.WriteLine($"ResetToCommit Error: {ex.Message}");
+            }
+        }
+
+        private void ApplySnapshotToFolder(RepositorySnapshotResponse snapshot, string targetFolder)
+        {
+            if (!Directory.Exists(targetFolder))
+                Directory.CreateDirectory(targetFolder);
+
+            foreach(var file in Directory.GetFiles(targetFolder, "*", SearchOption.AllDirectories))
+            {
+                File.Delete(file);
+            }
+
+            foreach(var directory in Directory.GetDirectories(targetFolder, "*", SearchOption.AllDirectories))
+            {
+                if (Directory.Exists(directory) && !Directory.EnumerateFileSystemEntries(directory).Any())
+                    Directory.Delete(directory);     
+            }
+             
+            foreach(var file in snapshot.Files)
+            {
+                var safeRelativePath = file.Path.Replace('\\', '/').TrimStart('/');
+
+                var fullPath = System.IO.Path.Combine(targetFolder, safeRelativePath.Replace('/', System.IO.Path.DirectorySeparatorChar));
+
+                string? directory = System.IO.Path.GetDirectoryName(fullPath);
+
+                if(!string.IsNullOrWhiteSpace(directory))
+                    Directory.CreateDirectory(directory);
+
+                File.WriteAllBytes(fullPath, file.Data);
+            }
+
+            _repositoryRoot = targetFolder;
+            Path = targetFolder;
+            LoadFolderContent(targetFolder);
         }
 
         private void LoadFolderContent(string targetPath)

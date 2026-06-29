@@ -1,4 +1,5 @@
-﻿using HomemadeGit.Core.DTOs.Commits;
+﻿using HomemadeGit.Core.DTOs;
+using HomemadeGit.Core.DTOs.Commits;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -45,7 +46,7 @@ namespace HomemadeGit.Desktop.Services
             return await response.Content.ReadFromJsonAsync<CommitResponse>();
         }
 
-        public async Task<CommitResponse?> CreateCommitFormFolderAsync(int userId, int repositoryId, string folderPath, string title, string? description)
+        public async Task<CommitResponse?> CreateCommitFormFolderAsync(int userId, int repositoryId, string folderPath, int branchId, string title, string? description)
         {
             var files = Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories).Where(file => !ShouldSkipFile(folderPath, file))
                 .Select(file => new CreateCommitFileRequest
@@ -61,7 +62,7 @@ namespace HomemadeGit.Desktop.Services
                 Files = files
             };
 
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"api/repositories/{repositoryId}/commits");
+            var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"api/repositories/{repositoryId}/branches/{branchId}/commits");
 
             httpRequest.Headers.Add("X-User-Id", userId.ToString());
             httpRequest.Content = JsonContent.Create(request);
@@ -72,6 +73,45 @@ namespace HomemadeGit.Desktop.Services
 
             return await response.Content.ReadFromJsonAsync<CommitResponse>();
         }
+
+        public async Task<RepositorySnapshotResponse?> CloneRepositoryAsync(int userId, int repositoryId, int? branchId = null)
+        {
+            var url = branchId.HasValue ? $"api/repositories/{repositoryId}/clone?branchId={branchId.Value}" :
+                                          $"api/repositories/{repositoryId}/clone";
+
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Add("X-User-Id", userId.ToString());
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<RepositorySnapshotResponse>();
+        }
+
+        public async Task ResetBranchToCommitAsync(int userId, int repositoryId, int branchId, int commitId)
+        {
+            var requestBody = new ResetBranchRequest { CommitId = commitId };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"api/repositories/{repositoryId}/branches/{branchId}/reset");
+            request.Headers.Add("X-User-Id", userId.ToString());
+            request.Content = JsonContent.Create(requestBody);
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task<RepositorySnapshotResponse?> GetCommitSnapshotAsync(int userId, int commitId)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"api/commits/{commitId}/snapshot");
+
+            request.Headers.Add("X-User-Id", userId.ToString());
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<RepositorySnapshotResponse>();
+        }
+
         private bool ShouldSkipFile(string rootFolder, string filePath)
         {
             var relativePath = Path.GetRelativePath(rootFolder, filePath)
