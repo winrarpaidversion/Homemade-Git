@@ -1,4 +1,5 @@
-﻿using HomemadeGit.Core.DTOs.Commits;
+﻿using HomemadeGit.Core.DTOs;
+using HomemadeGit.Core.DTOs.Commits;
 using HomemadeGit.Core.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -80,6 +81,71 @@ namespace HomemadeGit.Api.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { errors = ex.Message });
+            }
+        }
+
+        [HttpGet("api/commits/{commitId:int}/snapshot")]
+        [ProducesResponseType(typeof(RepositorySnapshotResponse), 200)]
+        public async Task<ActionResult<RepositorySnapshotResponse>> GetCommitSnapshot([FromRoute] int commitId)
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+
+                var snapshot = await _commitService.GetCommitSnapshotAsync(userId, commitId);
+
+                return Ok(snapshot);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { errors = ex.Message });
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(new {errors = ex.Message});
+            }
+        }
+
+        [HttpGet("api/repositories/{repositoryId:int}/clone")]
+        [ProducesResponseType(typeof(RepositorySnapshotResponse), 200)]
+        public async Task<ActionResult<RepositorySnapshotResponse>> CloneRepository([FromRoute] int repositoryId, [FromQuery] int? branchId)
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+
+                var snapshot = await _commitService.CloneRepositoryAsync(userId, repositoryId, branchId);
+
+                return Ok(snapshot);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { errors = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { errors = ex.Message });
+            }
+        }
+
+        [HttpPost("api/repositories/{repositoryId:int}/branches/{branchId:int}/reset")]
+        public async Task<ActionResult> ResetBranchToCommit([FromRoute] int repositoryId, [FromRoute] int branchId, [FromBody] ResetBranchRequest request)
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+
+                await _commitService.ResetBranchToCommitAsync(userId, repositoryId, branchId, request);
+
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
         }
 
