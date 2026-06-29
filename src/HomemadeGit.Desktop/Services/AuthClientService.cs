@@ -49,7 +49,7 @@ namespace HomemadeGit.Desktop.Services
             try
             {
                 var request = new LoginRequest() { Login = login, Password = password };
-                var response = await _httpClient.PostAsJsonAsync("api/auth/login", request);
+                var response = await _httpClient.PostAsJsonAsync("/api/auth/login", request);
                 if (response.IsSuccessStatusCode)
                 {
                     return await response.Content.ReadFromJsonAsync<LoginResponse>();
