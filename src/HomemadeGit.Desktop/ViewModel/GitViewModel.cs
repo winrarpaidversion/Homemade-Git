@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GalaSoft.MvvmLight.Views;
+using HomemadeGit.Core.DTOs.Commits;
 using HomemadeGit.Core.DTOs.Repositories;
+using HomemadeGit.Core.Models;
 using HomemadeGit.Desktop.Services;
 using System;
 using System.Collections.ObjectModel;
@@ -16,9 +18,14 @@ namespace HomemadeGit.Desktop.ViewModel
     public partial class GitViewModel : ViewModelBase
     {
         private int UserId;
+        [ObservableProperty]
+        private string _TitleCommit;
+        [ObservableProperty]
+        private string _descriptionCommit;
         private string _repositoryRoot = string.Empty;
         private IDialogService _dialogService;
         private readonly RepositoryClientService _repositoryClientService;
+        private readonly CommitClientService _commitClientService;
 
         // DTO для отображения в списке
         public record RepositoryListItem(int Id, string Name, string? Description, bool IsPublic);
@@ -48,6 +55,8 @@ namespace HomemadeGit.Desktop.ViewModel
         [ObservableProperty]
         private RepositoryResponse? _currentRepository;
 
+        
+
         [ObservableProperty]
         private bool _isPublic = true;  // ВАЖНО: для привязки к CheckBox
 
@@ -56,6 +65,8 @@ namespace HomemadeGit.Desktop.ViewModel
 
         [ObservableProperty]
         private ObservableCollection<RepositoryListItem> _repositories = new();  // ВАЖНО: называется Repositories
+        [ObservableProperty]
+        private ObservableCollection<CommitResponse> _commits = new(); 
 
         [ObservableProperty]
         private ObservableCollection<FileSystemItem> _pathToFile = new();  // ВАЖНО: называется PathToFile
@@ -63,11 +74,12 @@ namespace HomemadeGit.Desktop.ViewModel
         [ObservableProperty]
         private ObservableCollection<TextLine> _codeLines = new();  // ВАЖНО: называется CodeLines
 
-        public GitViewModel(int userId, IDialogService dialogService, RepositoryClientService repositoryService)
+        public GitViewModel(int userId, IDialogService dialogService, RepositoryClientService repositoryService, CommitClientService commitClientService)
         {
             UserId = userId;
             _dialogService = dialogService;
             _repositoryClientService = repositoryService;
+            _commitClientService = commitClientService;
 
             // Загружаем репозитории при старте
             Task.Run(LoadRepositoriesAsync);
@@ -199,6 +211,67 @@ namespace HomemadeGit.Desktop.ViewModel
                 Debug.WriteLine($"CreateRepository Error: {ex.Message}");
             }
         }
+
+        [RelayCommand]
+        private async Task NewCommitAsync() 
+        {
+  
+            if (SelectedRepository == null)
+            {
+                StatusMessage = "Выберите репозиторий.";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(Path) || !Directory.Exists(Path))
+            {
+                StatusMessage = "Выберите корректную папку для коммита.";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(TitleCommit))
+            {
+                StatusMessage = "Введите заголовок коммита.";
+                return;
+            }
+
+            try
+            {
+                StatusMessage = "Создание коммита...";
+
+                // 2. Вызов сервиса
+                var createdCommit = await _commitClientService.CreateCommitFormFolderAsync(
+                    UserId,
+                    SelectedRepository.Id,
+                    Path,
+                    TitleCommit,
+                    DescriptionCommit
+                );
+
+
+                // 3. Обработка результата
+                if (createdCommit != null)
+                {
+                    // Добавляем созданный коммит в список
+                    Commits.Add(createdCommit);
+
+                    StatusMessage = $"Коммит '{createdCommit.Title}' успешно создан.";
+
+                    // Очистка полей ввода после успеха
+                    TitleCommit = string.Empty;
+                    DescriptionCommit = string.Empty;
+                }
+                else
+                {
+                    StatusMessage = "Не удалось создать коммит.";
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Ошибка при создании коммита: {ex.Message}";
+                Debug.WriteLine($"NewCommit Error: {ex.Message}");
+            }
+        }
+
 
         [RelayCommand]
         private async Task DeleteRepositoryAsync()

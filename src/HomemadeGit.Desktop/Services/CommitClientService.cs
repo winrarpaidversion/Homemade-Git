@@ -16,7 +16,7 @@ namespace HomemadeGit.Desktop.Services
         public CommitClientService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri("http://localhost:5000/");
+            _httpClient.BaseAddress = new Uri("http://localhost:5190/");
         }
 
         public async Task<List<CommitListItemResponse>> GetRepositoryCommitsAsync(int userId, int repositoryId)

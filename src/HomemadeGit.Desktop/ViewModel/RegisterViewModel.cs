@@ -5,6 +5,7 @@ using HomemadeGit.Core.Services;
 using HomemadeGit.Desktop.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace HomemadeGit.Desktop.ViewModel
@@ -36,51 +37,64 @@ namespace HomemadeGit.Desktop.ViewModel
         [RelayCommand]
         public async Task SignUp()
         {
-
-            var regiserResult =await AuthClientService.Register(Login, Password);
-            if (string.IsNullOrWhiteSpace(Login) || string.IsNullOrWhiteSpace(Password))
+            try
             {
-                TitleError = "Введите все поля";
-                IsError = "Visible";
-                return;
-            }
-            if (regiserResult.UserId != 0 || regiserResult != null)
+                var regiserResult = await AuthClientService.Register(Login, Password);
+                if (string.IsNullOrWhiteSpace(Login) || string.IsNullOrWhiteSpace(Password))
+                {
+                    TitleError = "Введите все поля";
+                    IsError = "Visible";
+                    return;
+                }
+                if (regiserResult.UserId != 0 || regiserResult != null)
+                {
+
+                    MainViewModel.CurrentPage = _gitviewModelFactory(regiserResult.UserId);
+
+                }
+                else
+                {
+
+                    IsError = "Visible";
+                    return;
+                }
+            }catch(Exception ex)
             {
-
-                MainViewModel.CurrentPage = _gitviewModelFactory(regiserResult.UserId);
-
+                Debug.WriteLine(ex.Message);
             }
-            else
-            {
-
-                IsError = "Visible";
-                return;
-            }
+           
 
 
         }
         [RelayCommand]
         public async Task SignIn()
         {
-            if (string.IsNullOrWhiteSpace(Login) || string.IsNullOrWhiteSpace(Password))
+            try
             {
-                TitleError = "Введите все поля";
-                IsError = "Visible";
-                return;
-            }
-            var loginResult =await AuthClientService.Login(Login, Password);
-            if (loginResult.UserId != 0 || loginResult != null)
-            {
-                MainViewModel.CurrentPage = _gitviewModelFactory(loginResult.UserId);
+                if (string.IsNullOrWhiteSpace(Login) || string.IsNullOrWhiteSpace(Password))
+                {
+                    TitleError = "Введите все поля";
+                    IsError = "Visible";
+                    return;
+                }
+                var loginResult = await AuthClientService.Login(Login, Password);
+                if ( loginResult != null)
+                {
+                    MainViewModel.CurrentPage = _gitviewModelFactory(loginResult.UserId);
 
-            }
-            else
-            {
-                TitleError = $"Такого пользователя  {loginResult.Login} нет:";
-                IsError = "Visible";
+                }
+                else
+                {
+                    TitleError = $"Пароль неправильный";
+                    IsError = "Visible";
 
-                return;
-            } 
+                    return;
+                }
+            }catch(Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+     
 
         }
 
