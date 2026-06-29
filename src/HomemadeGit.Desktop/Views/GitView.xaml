@@ -27,12 +27,16 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" >
 
                 <TextBlock Text="{Binding StatusMessage}" Foreground="#8A8F98" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                <ComboBox Name="Ветки"  Text="Ветка" ItemsSource="{Binding Branch}"  HorizontalAlignment="Center" >
-                    <ComboBoxItem>
+                <ComboBox Name="Ветки" 
+          Text="Ветка" 
+          ItemsSource="{Binding Branches}"  
+          HorizontalAlignment="Center"  
+          SelectedItem="{Binding SelectedBranch}">
+                    <ComboBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock FontWeight="Bold" Text="{Binding}"></TextBlock>
+                            <TextBlock FontWeight="Bold" Text="{Binding Name}" />
                         </DataTemplate>
-                    </ComboBoxItem>
+                    </ComboBox.ItemTemplate>
                 </ComboBox>
             </StackPanel>
         </Border>
@@ -114,16 +118,16 @@
         </Border>
         <!--ИСТОРИЯ КОММИТОВ-->
         <Border Grid.Column="1" Grid.Row="2">
-            <Grid RowDefinitions="auto,*">
+            <Grid RowDefinitions="auto,*, auto">
                 <StackPanel Grid.Row="0" Orientation="Horizontal" >
                     <TextBlock Text="Коммиты" Foreground="White" FontWeight="Bold" HorizontalAlignment="Left"/>
 
                 </StackPanel>
-                <ListBox ItemsSource="{Binding Historycommits}" Background="#1E2125" Foreground="White" Grid.Row="1"  SelectedItem="{Binding SelectedCommit}" >
+                <ListBox ItemsSource="{Binding Commits}" Background="#1E2125" Foreground="White" Grid.Row="1"  SelectedItem="{Binding SelectedCommit}" >
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Margin="5">
-                                <TextBlock Text="{Binding  AuthorLogin}" FontWeight="Bold" Foreground="White"/>
+                                <TextBlock Text="{Binding   AuthorLogin}" FontWeight="Bold" Foreground="White"/>
                                 <TextBlock Text="{Binding  Title}" Foreground="Gray"/>
                                 <TextBlock Text="{Binding  Description}" Foreground="Gray"/>
                      
@@ -131,6 +135,11 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+                <StackPanel Grid.Row="2">
+                    <TextBlock Text="Создание веток" Foreground="White"></TextBlock>
+                    <TextBox Text="{Binding TitleBranch}" Margin="10" Background="#1E2125"  Foreground="White"> </TextBox>
+                    <Button Command="{Binding CreateBranchCommand}" Height="40" Background="#285496" Content="Создать ветку" Margin="10" Foreground="White"></Button>
+                </StackPanel>
             </Grid>
         </Border>
         <!--ПАНЕЛЬ КОММИТОВ -->

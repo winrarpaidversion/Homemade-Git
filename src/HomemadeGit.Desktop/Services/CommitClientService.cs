@@ -1,4 +1,5 @@
 ﻿using HomemadeGit.Core.DTOs.Commits;
+using HomemadeGit.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -45,7 +46,7 @@ namespace HomemadeGit.Desktop.Services
             return await response.Content.ReadFromJsonAsync<CommitResponse>();
         }
 
-        public async Task<CommitResponse?> CreateCommitFormFolderAsync(int userId, int repositoryId, string folderPath, string title, string? description)
+        public async Task<CommitResponse?> CreateCommitFormFolderAsync(int userId, int repositoryId, int branchId ,string folderPath, string title, string? description)
         {
             var files = Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories).Where(file => !ShouldSkipFile(folderPath, file))
                 .Select(file => new CreateCommitFileRequest
@@ -60,8 +61,8 @@ namespace HomemadeGit.Desktop.Services
                 Description = description,
                 Files = files
             };
-
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"api/repositories/{repositoryId}/commits");
+         
+            var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"api/repositories/{repositoryId}/branches/{branchId}/commits");
 
             httpRequest.Headers.Add("X-User-Id", userId.ToString());
             httpRequest.Content = JsonContent.Create(request);
