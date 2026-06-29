@@ -16,9 +16,9 @@ namespace HomemadeGit.Core.Models
         public Commit? ParentCommit { get; set; }
         public int? ParentCommitId { get; set; }
 
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public string Hash { get; set; }
+        public string Hash { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
 
         public ICollection<CommitFiles> CommitFiles { get; set; } = new List<CommitFiles>();
