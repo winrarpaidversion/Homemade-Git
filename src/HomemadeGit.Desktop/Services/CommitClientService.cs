@@ -62,13 +62,14 @@ namespace HomemadeGit.Desktop.Services
                 Files = files
             };
 
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"api/repositories/{repositoryId}/branches/{branchId}/commits");
+            var httpRequest = new HttpRequestMessage(
+                HttpMethod.Post,
+                $"api/repositories/{repositoryId}/branches/{branchId}/commits");
 
             httpRequest.Headers.Add("X-User-Id", userId.ToString());
             httpRequest.Content = JsonContent.Create(request);
 
             var response = await _httpClient.SendAsync(httpRequest);
-
             response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadFromJsonAsync<CommitResponse>();

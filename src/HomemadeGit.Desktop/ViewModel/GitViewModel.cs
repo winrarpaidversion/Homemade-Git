@@ -29,6 +29,7 @@ namespace HomemadeGit.Desktop.ViewModel
         private IDialogService _dialogService;
         private readonly RepositoryClientService _repositoryClientService;
         private readonly CommitClientService _commitClientService;
+        private readonly BranchClientService _branchClientService;
 
         [ObservableProperty]
         private CommitListItemResponse? _selectedCommit;
@@ -85,21 +86,127 @@ namespace HomemadeGit.Desktop.ViewModel
         [ObservableProperty]
         private BranchResponse? _selectedBranch;
 
+        [ObservableProperty]
+        private ObservableCollection<BranchResponse> _branches = new();
+
+        [ObservableProperty]
+        private string _newBranchName = string.Empty;
+
 
         private string TitleRepository => _selectedRepository.Name;
-        public GitViewModel(int userId, IDialogService dialogService, RepositoryClientService repositoryService, CommitClientService commitClientService)
+        public GitViewModel(int userId, IDialogService dialogService, RepositoryClientService repositoryService, CommitClientService commitClientService, BranchClientService branchClientService)
         {
             UserId = userId;
             _dialogService = dialogService;
             _repositoryClientService = repositoryService;
             _commitClientService = commitClientService;
-
+            _branchClientService = branchClientService;
 
             // Загружаем репозитории при старте
             Task.Run(LoadRepositoriesAsync);
         }
 
         // ===== КОМАНДЫ =====
+
+        [RelayCommand]
+        private async Task LoadBranchesAsync()
+        {
+            if (SelectedRepository == null)
+            {
+                StatusMessage = "Выберите репозиторий для загрузки веток.";
+                return;
+            }
+
+            try
+            {
+                StatusMessage = "Загрузка веток...";
+
+                var result = await _branchClientService.GetBranchesAsync(
+                    UserId,
+                    SelectedRepository.Id);
+
+                Branches.Clear();
+
+                foreach (var branch in result)
+                {
+                    Branches.Add(branch);
+                }
+
+                SelectedBranch =
+                    Branches.FirstOrDefault(b => b.IsDefault)
+                    ?? Branches.FirstOrDefault();
+
+                if (SelectedBranch != null)
+                {
+                    StatusMessage = $"Выбрана ветка: {SelectedBranch.Name}";
+                }
+                else
+                {
+                    StatusMessage = "Ветки не найдены. Проверь, создаётся ли main при создании репозитория.";
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Ошибка загрузки веток: {ex.Message}";
+                Debug.WriteLine($"LoadBranches Error: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        private async Task CreateBranchAsync()
+        {
+            if (SelectedRepository == null)
+            {
+                StatusMessage = "Выберите репозиторий.";
+                return;
+            }
+
+            var branchName = NewBranchName?.Trim();
+
+            if (string.IsNullOrWhiteSpace(branchName))
+            {
+                StatusMessage = "Введите название ветки.";
+                return;
+            }
+
+            if (Branches.Any(b =>
+            string.Equals(b.Name, branchName, StringComparison.OrdinalIgnoreCase)))
+            {
+                StatusMessage = $"Ветка '{branchName}' уже существует.";
+                return;
+            }
+
+            try
+            {
+                StatusMessage = "Создание ветки...";
+
+                var createdBranch = await _branchClientService.CreateBranchAsync(
+                    UserId,
+                    SelectedRepository.Id,
+                    branchName,
+                    SelectedBranch?.Id);
+
+                if (createdBranch == null)
+                {
+                    StatusMessage = "Не удалось создать ветку.";
+                    return;
+                }
+
+                NewBranchName = string.Empty;
+
+                await LoadBranchesAsync();
+
+                SelectedBranch = Branches.FirstOrDefault(b => b.Id == createdBranch.Id)
+                                 ?? SelectedBranch;
+
+                StatusMessage = $"Ветка '{createdBranch.Name}' создана.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Ошибка создания ветки: {ex.Message}";
+                Debug.WriteLine($"CreateBranch Error: {ex.Message}");
+            }
+        }
 
         private async Task LoadCommitAsync()
         {
@@ -271,6 +378,8 @@ namespace HomemadeGit.Desktop.ViewModel
                     Description = repo.Description ?? string.Empty;
                     IsPublic = repo.isPublic;
                     StatusMessage = $"Загружен: {repo.Name}";
+
+                    await LoadBranchesAsync();
                     await LoadCommitAsync();
                 }
                 else
@@ -334,7 +443,13 @@ namespace HomemadeGit.Desktop.ViewModel
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(Path) || !Directory.Exists(_repositoryRoot))
+            if (SelectedBranch == null)
+            {
+                StatusMessage = "Выберите ветку.";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(_repositoryRoot) || !Directory.Exists(_repositoryRoot))
             {
                 StatusMessage = "Выберите корректную папку для коммита.";
                 return;
@@ -366,6 +481,8 @@ namespace HomemadeGit.Desktop.ViewModel
 
                     TitleCommit = string.Empty;
                     DescriptionCommit = string.Empty;
+
+                    await LoadBranchesAsync();
                     await LoadCommitAsync();
                 }
                 else
@@ -650,6 +767,8 @@ namespace HomemadeGit.Desktop.ViewModel
 
         partial void OnSelectedRepositoryChanged(RepositoryListItem? value)
         {
+            ClearRepositoryViewState();
+
             if (value != null)
             {
                 LoadRepositoryDetailsCommand.Execute(null);
@@ -663,6 +782,25 @@ namespace HomemadeGit.Desktop.ViewModel
                 // ИСПРАВЛЕНО: Вызываем сгенерированную команду LoadCommitDetailsCommand
                 LoadCommitDetailsCommand.Execute(null);
             }
+        }
+
+        private void ClearRepositoryViewState()
+        {
+            Historycommits.Clear();
+            Commits.Clear();
+
+            SelectedCommit = null;
+
+            Branches.Clear();
+            SelectedBranch = null;
+
+            CodeLines.Clear();
+            PathToFile.Clear();
+
+            CurrentRepository = null;
+
+            _repositoryRoot = string.Empty;
+            Path = string.Empty;
         }
 
         // Свойство для XAML

@@ -26,14 +26,14 @@
         <Border Grid.Row="0" Grid.ColumnSpan="6" Background="#2C3136" Padding="5,0">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" >
 
-                <TextBlock Text="{Binding StatusMessage}" Foreground="#8A8F98" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                <ComboBox Name="Ветки"  Text="Ветка" ItemsSource="{Binding Branch}"  HorizontalAlignment="Center" >
-                    <ComboBoxItem>
-                        <DataTemplate>
-                            <TextBlock FontWeight="Bold" Text="{Binding}"></TextBlock>
-                        </DataTemplate>
-                    </ComboBoxItem>
+                
+                <TextBlock Text="Ветка:" Foreground="White" Margin="15 0 5 0" VerticalAlignment="Center"/>
+                <ComboBox Name="Ветки" DisplayMemberPath="Name" Text="Ветка" ItemsSource="{Binding Branches}" SelectedItem="{Binding SelectedBranch}"  HorizontalAlignment="Center" Width="140" Height="24">
                 </ComboBox>
+
+                <TextBox Text="{Binding NewBranchName, UpdateSourceTrigger=PropertyChanged}" Width="120" Height="24" Background="#1E2125" Foreground="White" BorderBrush="#3A3F44"/>
+                <Button Command="{Binding CreateBranchCommand}" Content="Создать ветку" Height="24" Margin="5 0 0 0" Background="#285496" Foreground="White" BorderThickness="0"/>
+                <TextBlock Text="{Binding StatusMessage}" Foreground="#8A8F98" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" />
             </StackPanel>
         </Border>
 

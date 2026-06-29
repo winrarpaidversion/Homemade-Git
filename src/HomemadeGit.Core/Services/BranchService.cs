@@ -35,7 +35,7 @@ namespace HomemadeGit.Core.Services
 
             var existingBranch = await _branchStore.GetByNameAsync(repositoryId, request.Name.Trim());
 
-            if (existingBranch == null)
+            if (existingBranch != null)
             {
                 throw new Exception("branch with this name already exists");
             }
