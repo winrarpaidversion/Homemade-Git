@@ -24,7 +24,7 @@ namespace HomemadeGit.Core.Services
             _objectHasher = objectHasher;
         }
 
-        public async Task<CommitResponse> CreateCommitAsync(int userId, int repositoryId, CreateCommitRequest request)
+        public async Task<CommitResponse> CreateCommitAsync(int userId, int repositoryId, int branchId, CreateCommitRequest request)
         {
             var repository = await _repositoryStore.GetByIdAsync(repositoryId);
 
@@ -34,10 +34,13 @@ namespace HomemadeGit.Core.Services
             if (!CanWrite(repository, userId))
                 throw new Exception("DENIED");
 
-            var branch = await _branchStore.GetDefaultBranchAsync(repositoryId);
+            var branch = await _branchStore.GetByIdAsync(branchId);
 
             if (branch == null)
-                throw new Exception("Default branuch not found");
+                throw new Exception("branuch not found");
+
+            if (branch.RepositoryId != repositoryId)
+                throw new Exception("branch belongs to another repository");
 
             var createdAt = DateTime.UtcNow;
             var description = request.Description ?? string.Empty;
