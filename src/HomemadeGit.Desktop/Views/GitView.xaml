@@ -104,7 +104,7 @@
         <!--ПАНЕЛЬ КОММИТОВ -->
         <Border Grid.Column="1" Grid.Row="1">
             <Grid RowDefinitions="*,*">
-                <ListBox ItemsSource="{Binding  Commits}" Background="#1E2125" Foreground="White" >
+                <ListBox ItemsSource="{Binding  Commits}" Background="#1E2125" Foreground="White" ScrollViewer.HorizontalScrollBarVisibility="Auto" >
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel>
