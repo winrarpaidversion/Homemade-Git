@@ -81,6 +81,8 @@ namespace HomemadeGit.Desktop.Services
             return relativePath.StartsWith(".git/") ||
                    relativePath.StartsWith("bin/") ||
                    relativePath.StartsWith("obj/") ||
+                   relativePath.StartsWith("/bin/") ||
+                   relativePath.StartsWith("/obj/") ||
                    relativePath.StartsWith(".vs/");
         }
     }

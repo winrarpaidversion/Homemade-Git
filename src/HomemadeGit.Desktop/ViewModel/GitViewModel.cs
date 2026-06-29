@@ -26,6 +26,7 @@ namespace HomemadeGit.Desktop.ViewModel
         private IDialogService _dialogService;
         private readonly RepositoryClientService _repositoryClientService;
         private readonly CommitClientService _commitClientService;
+        private Dictionary<int, string> _repositoryLocalPaths = new();
 
         // DTO для отображения в списке
         public record RepositoryListItem(int Id, string Name, string? Description, bool IsPublic);
@@ -158,7 +159,23 @@ namespace HomemadeGit.Desktop.ViewModel
                     Title = repo.Name;
                     Description = repo.Description ?? string.Empty;
                     IsPublic = repo.isPublic;
-                    StatusMessage = $"Загружен: {repo.Name}";
+
+                    if (_repositoryLocalPaths.TryGetValue(SelectedRepository.Id, out var savedPath))
+                    {
+                        _repositoryRoot = savedPath;
+                        Path = savedPath;
+                        LoadFolderContent(savedPath);
+                        StatusMessage = $"Загружен: {repo.Name}";
+                    }
+                    else
+                    {
+                        _repositoryRoot = string.Empty;
+                        Path = string.Empty;
+                        PathToFile.Clear();
+                        CodeLines.Clear();
+
+                        StatusMessage = $"Загружен: {repo.Name}. Локальная папка не выбрана";
+                    }
                 }
                 else
                 {
@@ -181,6 +198,17 @@ namespace HomemadeGit.Desktop.ViewModel
                 return;
             }
 
+            string? selectedPath = _repositoryRoot;
+
+            if (string.IsNullOrWhiteSpace(selectedPath))
+                selectedPath = _dialogService.SelectFolder();
+
+            if (string.IsNullOrEmpty(selectedPath))
+            {
+                StatusMessage = "Выберите папку для репозитория";
+                return;
+            }
+
             try
             {
                 StatusMessage = "Создание репозитория...";
@@ -194,6 +222,13 @@ namespace HomemadeGit.Desktop.ViewModel
 
                 if (result != null)
                 {
+                    _repositoryLocalPaths[result.Id] = selectedPath;
+                    _repositoryRoot = selectedPath;
+                    Path = selectedPath;
+                    LoadFolderContent(selectedPath);
+
+                    SelectedRepository = new RepositoryListItem(result.Id, result.Name, result.Description, result.isPublic);
+
                     StatusMessage = $"Репозиторий '{result.Name}' создан!";
                     Title = string.Empty;
                     Description = string.Empty;
