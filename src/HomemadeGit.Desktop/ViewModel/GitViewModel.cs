@@ -26,6 +26,7 @@ namespace HomemadeGit.Desktop.ViewModel
         private IDialogService _dialogService;
         private readonly RepositoryClientService _repositoryClientService;
         private readonly CommitClientService _commitClientService;
+        private readonly BranchClientService _branchClientService;
         private Dictionary<int, string> _repositoryLocalPaths = new();
 
         // DTO для отображения в списке
@@ -75,13 +76,13 @@ namespace HomemadeGit.Desktop.ViewModel
         [ObservableProperty]
         private ObservableCollection<TextLine> _codeLines = new();  // ВАЖНО: называется CodeLines
 
-        public GitViewModel(int userId, IDialogService dialogService, RepositoryClientService repositoryService, CommitClientService commitClientService)
+        public GitViewModel(int userId, IDialogService dialogService, RepositoryClientService repositoryService, CommitClientService commitClientService, BranchClientService branchClientService)
         {
             UserId = userId;
             _dialogService = dialogService;
             _repositoryClientService = repositoryService;
             _commitClientService = commitClientService;
-
+            _branchClientService = branchClientService;
             // Загружаем репозитории при старте
             Task.Run(LoadRepositoriesAsync);
         }
