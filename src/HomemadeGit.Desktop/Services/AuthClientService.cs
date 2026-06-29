@@ -13,7 +13,7 @@ namespace HomemadeGit.Desktop.Services
         public AuthClientService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri("http://localhost:5000");
+            _httpClient.BaseAddress = new Uri("http://localhost:5190/");
         }
         public async Task<RegisterResponse> Register(string login, string password)
         {
@@ -49,7 +49,7 @@ namespace HomemadeGit.Desktop.Services
             try
             {
                 var request = new LoginRequest() { Login = login, Password = password };
-                var response = await _httpClient.PostAsJsonAsync("api/auth/login", request);
+                var response = await _httpClient.PostAsJsonAsync("/api/auth/login", request);
                 if (response.IsSuccessStatusCode)
                 {
                     return await response.Content.ReadFromJsonAsync<LoginResponse>();

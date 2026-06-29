@@ -15,7 +15,7 @@ namespace HomemadeGit.Desktop.Services
         public RepositoryClientService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri("http://localhost:5000");
+            _httpClient.BaseAddress = new Uri("http://localhost:5190/");
         }
 
         // Получение списка репозиториев

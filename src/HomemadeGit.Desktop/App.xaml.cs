@@ -27,6 +27,7 @@ namespace HomemadeGit.Desktop
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<RegisterViewModel>();
             services.AddSingleton<RepositoryClientService>();
+            services.AddSingleton<CommitClientService>();
             services.AddSingleton<Func<int, GitViewModel>>(sp => id =>
               ActivatorUtilities.CreateInstance<GitViewModel>(sp, id));
             services.AddHttpClient();

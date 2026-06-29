@@ -15,7 +15,7 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>
-            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="300"/>
             <ColumnDefinition Width="5"/>
             <ColumnDefinition Width="*"/>
@@ -101,8 +101,44 @@
                         Content="➕ Создать" Height="30" Background="#285496" Foreground="White" BorderThickness="0"/>
             </Grid>
         </Border>
+        <!--ПАНЕЛЬ КОММИТОВ -->
+        <Border Grid.Column="1" Grid.Row="1">
+            <Grid RowDefinitions="*,*">
+                <ListBox ItemsSource="{Binding  Commits}" Background="#1E2125" Foreground="White" ScrollViewer.HorizontalScrollBarVisibility="Auto" >
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding RepositoryId}"/>
+                                <TextBlock Text="{Binding AuthorLogin}"/>
+                                <ItemsControl ItemsSource="{Binding Files}">
+                                    <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Path}"></TextBlock>
+                              
+                                    </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Text="{Binding  Hash}"/>
+                                <TextBlock Text="{Binding   CreatedAt}"/>
+                                <TextBlock Text="{Binding  CommitMessage}"/>
+                                <TextBlock Text="{Binding   Message}"/>
 
-        <GridSplitter Grid.Row="1" Grid.Column="1" Width="5" Background="#1C1E21" Cursor="SizeWE"/>
+
+                            </StackPanel>
+
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <StackPanel Grid.Row="1">
+                    <TextBlock Text="Title" Foreground="White"></TextBlock>
+                    <TextBox Text="{Binding TitleCommit}"  Margin="0,5"/>
+                    <TextBlock Text="Description" Foreground="White"></TextBlock>
+                    <TextBox Text="{Binding DescriptionCommit}"  Margin="0,5"/>
+                    <Button Command="{Binding NewCommitCommand}" Content="Закоммитить" Background="#285496" Foreground="White"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
 
         <!-- СРЕДНЯЯ ПАНЕЛЬ: Содержимое репозитория -->
         <Border Grid.Row="1" Grid.Column="2" Background="#25292E">
