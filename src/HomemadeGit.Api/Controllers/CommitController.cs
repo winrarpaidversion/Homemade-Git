@@ -15,15 +15,15 @@ namespace HomemadeGit.Api.Controllers
             _commitService = commitService;
         }
 
-        [HttpPost("api/repositories/{repositoryId:int}/commits")]
+        [HttpPost("api/repositories/{repositoryId:int}/branches/{branchId:int}/commits")]
         [ProducesResponseType(typeof(CommitResponse), 200)]
-        public async Task<ActionResult<CommitResponse>> CreateCommit([FromRoute] int repositoryId, [FromBody] CreateCommitRequest request)
+        public async Task<ActionResult<CommitResponse>> CreateCommit([FromRoute] int repositoryId, [FromRoute] int branchId, [FromBody] CreateCommitRequest request)
         {
             try
             {
                 var userId = GetCurrentUserId();
 
-                var commit = await _commitService.CreateCommitAsync(userId, repositoryId, request);
+                var commit = await _commitService.CreateCommitAsync(userId, repositoryId, branchId, request);
 
                 return Ok(commit);
 

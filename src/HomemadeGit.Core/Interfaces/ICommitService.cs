@@ -7,7 +7,7 @@ namespace HomemadeGit.Core.Interfaces
 {
     public interface ICommitService
     {
-        Task<CommitResponse> CreateCommitAsync(int userId, int repositoryId, CreateCommitRequest request);
+        Task<CommitResponse> CreateCommitAsync(int userId, int repositoryId, int branchId, CreateCommitRequest request);
 
         Task<List<CommitListItemResponse>> GetRepositoryCommitsAsync(int userId, int repositoryId);
 

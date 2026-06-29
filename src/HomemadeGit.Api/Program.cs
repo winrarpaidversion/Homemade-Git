@@ -23,6 +23,7 @@ namespace HomemadeGit.Api
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IRepositoryService, RepositoryService>();
             builder.Services.AddScoped<ICommitService, CommitService>();
+            builder.Services.AddScoped<IBranchService, BranchService>();
 
             builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
             builder.Services.AddScoped<IObjectHasher, Sha256ObjectHasher>();
